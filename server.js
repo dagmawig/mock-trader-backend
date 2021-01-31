@@ -22,18 +22,23 @@ app.use(cors({origin: '*'}));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.get('/getPrice/:ticker?', (req, res) => {
+app.get('/', function(req, res){
+  res.sendFile(process.cwd() + '/views/index.html');
+});
+
+router.get('/getPrice/:ticker?', (req, res) => {
         let url = 'https://finance.yahoo.com/quote/';
         var ticker = req.params.id;
         url = url + ticker;
-        
+        console.log(url);
+  
   axios.get(url)
     .then(resp => {
         const $ = cheerio.load(""+resp.data);
-
+        //console.log(resp.data);
         let price = $('div[id="quote-header-info"]').find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]').text().toString();
 
-        console.log(price);
+        console.log("price is:", price);
         return res.json({success: true, price: price});
     })
     .catch(err => {
