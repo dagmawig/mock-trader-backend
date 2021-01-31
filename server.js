@@ -28,6 +28,7 @@ app.get('/getPrice/:ticker?', (req, res) => {
         let price = $('div[id="quote-header-info"]').find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]').text().toString();
 
         console.log(price);
+        return res.json({success: true, price: price})
     })
     .catch(err => {
         console.log(err);
