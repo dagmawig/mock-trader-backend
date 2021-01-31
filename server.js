@@ -28,7 +28,7 @@ app.get('/', function(req, res){
 
 router.get('/getPrice/:ticker?', (req, res) => {
         let url = 'https://finance.yahoo.com/quote/';
-        var ticker = req.params.id;
+        var ticker = req.params.ticker;
         url = url + ticker;
         console.log(url);
   
@@ -45,6 +45,9 @@ router.get('/getPrice/:ticker?', (req, res) => {
         console.log(err);
     })
         })
+
+// append /api for our http requests
+app.use('/', router);
 
 // launch our backend into a port
 app.listen(API_PORT, () => console.log(`LISTENING ON PORT ${API_PORT}`));
