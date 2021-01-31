@@ -7,6 +7,7 @@ const express = require("express");
 const app = express();
 const cheerio = require("cheerio");
 const axios = require("axios");
+const bodyParser = require('body-parser');
 var cors = require('cors');
 
 
@@ -16,19 +17,24 @@ const router = express.Router();
 
 app.use(cors({origin: '*'}));
 
+// (optional) only made for logging and
+// bodyParser, parses the request body to be a readable json format
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 app.get('/getPrice/:ticker?', (req, res) => {
         let url = 'https://finance.yahoo.com/quote/';
         var ticker = req.params.id;
         url = url + ticker;
         
   axios.get(url)
-    .then(res => {
-        const $ = cheerio.load(""+res.data);
+    .then(resp => {
+        const $ = cheerio.load(""+resp.data);
 
         let price = $('div[id="quote-header-info"]').find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]').text().toString();
 
         console.log(price);
-        return res.json({success: true, price: price})
+        return res.json({success: true, price: price});
     })
     .catch(err => {
         console.log(err);
