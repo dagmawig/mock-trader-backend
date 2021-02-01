@@ -9,6 +9,7 @@ const cheerio = require("cheerio");
 const axios = require("axios");
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const Data = require('./data');
 var cors = require('cors');
 
 
@@ -39,7 +40,9 @@ app.get('/', function(req, res){
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
-
+router.post('./createUser', (req, res) => {
+  let data = 
+})
 
 router.get('/getPrice/:ticker?', (req, res) => {
         let url = 'https://finance.yahoo.com/quote/';
