@@ -43,9 +43,9 @@ app.get('/', function(req, res){
 
 // this is our create method
 // this method creates new user in our database
-router.post('./createUser', (req, res) => {
+router.post('/createUser', (req, res) => {
   let data = new Data();
-  
+  console.log("createUser");
   const { userID } = req.body;
   data.userID = userID;
   data.save((err) => {
