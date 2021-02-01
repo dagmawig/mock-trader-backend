@@ -45,9 +45,9 @@ app.get('/', function(req, res){
 // this method creates new user in our database
 router.post('/createUser', (req, res) => {
   let data = new Data();
-  console.log("createUser");
   const { userID } = req.body;
   data.userID = userID;
+  
   data.save((err) => {
     if (err) return res.json({success: false, error: err});
     return res.json({success: true, data: data});
@@ -58,7 +58,10 @@ router.post('/createUser', (req, res) => {
 router.post('/updateWatchlist', (req, res) => {
   const { userID, watchlist } = req.body;
   
-  
+  db.collection.find( { userID: userID }, (err , data) => {
+  console.log(data);
+    return res.json({success: true, watchlist: watchlist})
+  } )
 });
 
 
