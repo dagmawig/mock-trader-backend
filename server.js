@@ -40,9 +40,20 @@ app.get('/', function(req, res){
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
+
+// this is our create method
+// this method creates new user in our database
 router.post('./createUser', (req, res) => {
-  let data = 
-})
+  let data = new Data();
+  
+  const { userID } = req.body;
+  data.userID = userID;
+  data.save((err) => {
+    if (err) return res.json({success: false, error: err});
+    return res.json({success: true, data: data});
+  });
+});
+
 
 router.get('/getPrice/:ticker?', (req, res) => {
         let url = 'https://finance.yahoo.com/quote/';
