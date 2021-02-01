@@ -54,6 +54,11 @@ router.post('/createUser', (req, res) => {
   });
 });
 
+// this method updated stock watchlist
+router.post('/updateWatchlist', (req, res) => {
+  const { userID, watchlist }
+});
+
 
 router.get('/getPrice/:ticker?', (req, res) => {
         let url = 'https://finance.yahoo.com/quote/';
