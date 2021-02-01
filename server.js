@@ -57,9 +57,13 @@ router.post('/createUser', (req, res) => {
 // this method updated stock watchlist
 router.post('/updateWatchlist', (req, res) => {
   const { userID, watchlist } = req.body;
-  
-  db.collection.find( { userID: userID }, (err , data) => {
-  console.log(data);
+  console.log(watchlist);
+  Data.find( { userID: userID }, (err , data) => {
+    Data.findAndModify({ userID: userID }, (err, data) => {
+      if(err) throw err
+      
+    })
+    console.log(data);
     return res.json({success: true, watchlist: watchlist})
   } )
 });
