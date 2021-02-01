@@ -58,6 +58,7 @@ router.post('/createUser', (req, res) => {
 router.post('/updateWatchlist', (req, res) => {
   const { userID, watchlist } = req.body;
   
+  
 });
 
 
