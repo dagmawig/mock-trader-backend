@@ -56,7 +56,8 @@ router.post('/createUser', (req, res) => {
 
 // this method updated stock watchlist
 router.post('/updateWatchlist', (req, res) => {
-  const { userID, watchlist }
+  const { userID, watchlist } = req.body;
+  
 });
 
 
