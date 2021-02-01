@@ -28,14 +28,18 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 
 let db = mongoose.connection;
 
-//db.once('open', () => console.log('connected to database'));
+db.once('open', () => console.log('connected to database'));
 
 // checks if connection with the database is successful
-//db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+
 
 app.get('/', function(req, res){
   res.sendFile(process.cwd() + '/views/index.html');
 });
+
+
 
 router.get('/getPrice/:ticker?', (req, res) => {
         let url = 'https://finance.yahoo.com/quote/';
