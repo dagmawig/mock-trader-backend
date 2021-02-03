@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 const DataSchema = new Schema(
   {
     userID: {type: String, default: ""},
-    watchlist: {type: Array, default: []},
+    watchlist: {type: Object, default: []},
     investing: {type: Schema.Types.Mixed, default: {}}
   },
   { timestamps: true, _id: true, minimize: false, strict: false }
