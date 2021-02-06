@@ -101,51 +101,30 @@ router.post("/updatePrice", (req, res) => {
   let url = "https://finance.yahoo.com/quote/";
   const { tickerArr } = req.body;
   let data = { ticker: tickerArr, price: [] };
-  
-  async function updatePrice() {
-    tickerArr.map((ticker)=> {
-      
-    })
-    let res1 = await axios
-    .get(url + ticker)
-    .then(resp => {
-      const $ = cheerio.load("" + resp.data);
-      let price = $('div[id="quote-header-info"]')
-        .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
-        .text()
-        .toString();
 
-      data.price.push(price);
-      console.log("data is:", data);
-      //return res.json({ success: true, price: price });
-    })
-    .catch(err => {
-      console.log(err);
-    });
-  }
-  
+  tickerArr.map(ticker => {
+    async function updatePrice() {
+      let res1 = await axios
+        .get(url + ticker)
+        .then(resp => {
+          const $ = cheerio.load("" + resp.data);
+          let price = $('div[id="quote-header-info"]')
+            .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
+            .text()
+            .toString();
 
-  watchlistT.map(ticker => {
-    axios
-      .get(url + ticker)
-      .then(resp => {
-        const $ = cheerio.load("" + resp.data);
-        let price = $('div[id="quote-header-info"]')
-          .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
-          .text()
-          .toString();
-
-        console.log("price is:", price);
-
-        watchlist.price.push(price);
-        //return res.json({ success: true, price: price });
-      })
-      .catch(err => {
-        console.log(err);
-      });
+          data.price.push(price);
+          console.log("data is:", data);
+          //return res.json({ success: true, price: price });
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
+    updatePrice();
   });
-
-  return res.json({ success: true, data: [search, watchlist] });
+  
+  return res.json({ success: true, data: data });
 });
 
 // append /api for our http requests
