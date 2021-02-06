@@ -96,14 +96,14 @@ router.get("/getPrice/:ticker?", (req, res) => {
     });
 });
 
-router.get("/updatePrice", (req, res) => {
+router.post("/updatePrice", (req, res) => {
   console.log("it got to update!!!");
   let url = "https://finance.yahoo.com/quote/";
   const { searchT, watchlistT } = req.body;
   let search = { ticker: searchT, price: "" };
   let watchlist = { ticker: watchlistT, price: [] };
 
-  axios
+  let res1 = axios
     .get(url + searchT)
     .then(resp => {
       const $ = cheerio.load("" + resp.data);
@@ -112,35 +112,35 @@ router.get("/updatePrice", (req, res) => {
         .text()
         .toString();
 
-      console.log("price is:", price);
       search.price = price;
+      console.log("search price is:", search.price, searchT);
       //return res.json({ success: true, price: price });
     })
     .catch(err => {
       console.log(err);
     });
-  
-  watchlistT.map((ticker) => {
-    axios
-    .get(url + ticker)
-    .then(resp => {
-      const $ = cheerio.load("" + resp.data);
-      let price = $('div[id="quote-header-info"]')
-        .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
-        .text()
-        .toString();
 
-      console.log("price is:", price);
-      
-      watchlist.price.push(price);
-      //return res.json({ success: true, price: price });
-    })
-    .catch(err => {
-      console.log(err);
-    });
+  watchlistT.map(ticker => {
+    axios
+      .get(url + ticker)
+      .then(resp => {
+        const $ = cheerio.load("" + resp.data);
+        let price = $('div[id="quote-header-info"]')
+          .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
+          .text()
+          .toString();
+
+        console.log("price is:", price);
+
+        watchlist.price.push(price);
+        //return res.json({ success: true, price: price });
+      })
+      .catch(err => {
+        console.log(err);
+      });
   });
-  
-  return res.json({ success: true, data: [search, watchlist]});
+
+  return res.json({ success: true, data: [search, watchlist] });
 });
 
 // append /api for our http requests
