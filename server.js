@@ -103,7 +103,7 @@ router.post("/updatePrice", (req, res) => {
   let data = { ticker: tickerArr, price: [] };
 
   async function updatePrice() {
-    
+     
     const promises = tickerArr.map(async ticker => {
     const response = await axios
     .get(url+ticker)
@@ -116,7 +116,7 @@ router.post("/updatePrice", (req, res) => {
         .toString();
 
       console.log("price is:", price);
-      return price;
+      data.price.push(price);
     })
     .catch(err => {
       console.log(err);
@@ -129,7 +129,13 @@ router.post("/updatePrice", (req, res) => {
     
   }
   
+  updatePrice()
+  .then(res=> {
+    console.log("data is:", data);
+    return res.json({ success: true, data: data });
+  })
   
+  //return res.json({ success: true, data: priceArr });
   
 });
 
