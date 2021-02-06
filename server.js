@@ -100,8 +100,8 @@ router.post("/updatePrice", (req, res) => {
   console.log("it got to update!!!");
   let url = "https://finance.yahoo.com/quote/";
   const { tickerArr } = req.body;
-  let data = { ticker: tickerArr, price: [] };
-  console.log(tickerArr);
+  
+  
   function updatePrice(tickerArr) {
     return Promise.all(tickerArr.map(fetchPrice));
   }
