@@ -99,12 +99,15 @@ router.get("/getPrice/:ticker?", (req, res) => {
 router.post("/updatePrice", (req, res) => {
   console.log("it got to update!!!");
   let url = "https://finance.yahoo.com/quote/";
-  const { searchT, watchlistT } = req.body;
-  let search = { ticker: searchT, price: "" };
-  let watchlist = { ticker: watchlistT, price: [] };
-
-  let res1 = axios
-    .get(url + searchT)
+  const { tickerArr } = req.body;
+  let data = { ticker: tickerArr, price: [] };
+  
+  async function updatePrice() {
+    tickerArr.map((ticker)=> {
+      
+    })
+    let res1 = await axios
+    .get(url + ticker)
     .then(resp => {
       const $ = cheerio.load("" + resp.data);
       let price = $('div[id="quote-header-info"]')
@@ -112,13 +115,15 @@ router.post("/updatePrice", (req, res) => {
         .text()
         .toString();
 
-      search.price = price;
-      console.log("search price is:", search.price, searchT);
+      data.price.push(price);
+      console.log("data is:", data);
       //return res.json({ success: true, price: price });
     })
     .catch(err => {
       console.log(err);
     });
+  }
+  
 
   watchlistT.map(ticker => {
     axios
