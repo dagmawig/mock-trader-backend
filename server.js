@@ -110,12 +110,12 @@ router.post("/updatePrice", (req, res) => {
     return axios
       .get(url + ticker)
       .then(function(response) {
-        // const $ = cheerio.load("" + response.data);
-        // let price = $('div[id="quote-header-info"]')
-        //   .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
-        //   .text()
-        //   .toString();
-        return response.data;
+        const $ = cheerio.load("" + response.data);
+        let price = $('div[id="quote-header-info"]')
+          .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
+          .text()
+          .toString();
+        return price;
       })
       .catch(function(error) {
         return { success: false };
