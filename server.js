@@ -130,7 +130,7 @@ router.post("/updatePrice", (req, res) => {
     .catch(e => {
       console.log(e);
     });
-  return res.json({ success: true });
+  //return res.json({ success: true });
   //         axios
   //         .get(url)
   //         .then(resp => {
