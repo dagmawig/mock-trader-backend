@@ -101,41 +101,52 @@ router.post("/updatePrice", (req, res) => {
   let url = "https://finance.yahoo.com/quote/";
   const { tickerArr } = req.body;
   let data = { ticker: tickerArr, price: [] };
+  console.log(tickerArr);
+  function updatePrice(tickerArr) {
+    return Promise.all(tickerArr.map(fetchPrice));
+  }
 
-   function updatePrice(tickerArr){
-  return Promise.all(tickerArr.map(fetchPrice));
-}     
   function fetchPrice(ticker) {
-  return axios
-    .get(url+ticker)
-    .then(function(response) {
-      return {
-        success: true,
-        data: response.data
-      };
-    })
-    .catch(function(error) {
-      return { success: false };
-    });
-}
-      
-        axios
-        .get(url)
-        .then(resp => {
-          const $ = cheerio.load("" + resp.data);
-          let price = $('div[id="quote-header-info"]')
-            .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
-            .text()
-            .toString();
+    return axios
+      .get(url + ticker)
+      .then(function(response) {
+        const $ = cheerio.load("" + response.data);
+        let price = $('div[id="quote-header-info"]')
+          .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
+          .text()
+          .toString();
+        return price;
+      })
+      .catch(function(error) {
+        return { success: false };
+      });
+  }
 
-          console.log("price is:", price);
-        })
-        .catch(err => {
-          console.log(err);
-        });
-    
-        
-  return null;
+  updatePrice(tickerArr)
+    .then(resp => {
+      console.log(resp);
+    return res.json({ success: true, data:{ticker: tickerArr, price: resp}});
+    })
+    .catch(e => {
+      console.log(e);
+    });
+  return res.json({ success: true });
+  //         axios
+  //         .get(url)
+  //         .then(resp => {
+  //           const $ = cheerio.load("" + resp.data);
+  //           let price = $('div[id="quote-header-info"]')
+  //             .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
+  //             .text()
+  //             .toString();
+
+  //           console.log("price is:", price);
+  //         })
+  //         .catch(err => {
+  //           console.log(err);
+  //         });
+
+  // return null;
 
   // updatePrice().then(res => {
   //   console.log("data is:", data);
