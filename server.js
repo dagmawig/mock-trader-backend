@@ -103,40 +103,40 @@ router.post("/updatePrice", (req, res) => {
   let data = { ticker: tickerArr, price: [] };
 
   async function updatePrice() {
-     
     const promises = tickerArr.map(async ticker => {
-    const response = await axios
-    .get(url+ticker)
-    .then(resp => {
-      const $ = cheerio.load("" + resp.data);
-      //console.log(resp.data);
-      let price = $('div[id="quote-header-info"]')
-        .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
-        .text()
-        .toString();
+      const response = await axios
+        .get(url + ticker)
+        .then(resp => {
+          const $ = cheerio.load("" + resp.data);
+          //console.log(resp.data);
+          let price = $('div[id="quote-header-info"]')
+            .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
+            .text()
+            .toString();
 
-      console.log("price is:", price);
-      data.price.push(price);
-    })
-    .catch(err => {
-      console.log(err);
+          console.log("price is:", price);
+          //data.price.push(price);
+          //return price;
+        })
+        .catch(err => {
+          console.log(err);
+        });
+      return response.data;
     });
-  })
   
-  let priceArr = await Promise.all(promises);
-    
-  
-    
+    let priceArr = await Promise.all(promises);
+    console.log(priceArr);
+    return priceArr;
   }
-  
-  updatePrice()
-  .then(res=> {
-    console.log("data is:", data);
-    return res.json({ success: true, data: data });
-  })
-  
+  updatePrice();
+  return null;
+
+  // updatePrice().then(res => {
+  //   console.log("data is:", data);
+  //   return res.json({ success: true, data: data });
+  // });
+
   //return res.json({ success: true, data: priceArr });
-  
 });
 
 // append /api for our http requests
