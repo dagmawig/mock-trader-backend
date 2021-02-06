@@ -102,9 +102,13 @@ router.post("/updatePrice", (req, res) => {
   const { tickerArr } = req.body;
   let data = { ticker: tickerArr, price: [] };
 
-  async function updatePrice() {
-    const promises = tickerArr.map(async ticker => {
-      const response = await axios
+  
+    let prices = Promise.all(tickerArr.map( ticker => {
+      
+      let response;
+      
+      try {
+        response = await axios
         .get(url + ticker)
         .then(resp => {
           const $ = cheerio.load("" + resp.data);
@@ -121,14 +125,15 @@ router.post("/updatePrice", (req, res) => {
         .catch(err => {
           console.log(err);
         });
-      return response.data;
-    });
+      }
+      
+      
+    }));
   
     let priceArr = await Promise.all(promises);
     console.log(priceArr);
     return priceArr;
-  }
-  updatePrice();
+  
   return null;
 
   // updatePrice().then(res => {
