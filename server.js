@@ -102,38 +102,39 @@ router.post("/updatePrice", (req, res) => {
   const { tickerArr } = req.body;
   let data = { ticker: tickerArr, price: [] };
 
-  
-    let prices = Promise.all(tickerArr.map( ticker => {
+   function updatePrice(tickerArr){
+  return Promise.all(tickerArr.map(fetchPrice));
+}     
+  function fetchPrice(ticker) {
+  return axios
+    .get(url+ticker)
+    .then(function(response) {
+      return {
+        success: true,
+        data: response.data
+      };
+    })
+    .catch(function(error) {
+      return { success: false };
+    });
+}
       
-      let response;
-      
-      try {
-        response = await axios
-        .get(url + ticker)
+        axios
+        .get(url)
         .then(resp => {
           const $ = cheerio.load("" + resp.data);
-          //console.log(resp.data);
           let price = $('div[id="quote-header-info"]')
             .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
             .text()
             .toString();
 
           console.log("price is:", price);
-          //data.price.push(price);
-          //return price;
         })
         .catch(err => {
           console.log(err);
         });
-      }
-      
-      
-    }));
-  
-    let priceArr = await Promise.all(promises);
-    console.log(priceArr);
-    return priceArr;
-  
+    
+        
   return null;
 
   // updatePrice().then(res => {
