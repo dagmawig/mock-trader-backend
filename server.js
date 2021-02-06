@@ -96,15 +96,15 @@ router.get("/getPrice/:ticker?", (req, res) => {
     });
 });
 
-
 router.get("/updatePrice", (req, res) => {
+  console.log("it got to update!!!");
   let url = "https://finance.yahoo.com/quote/";
   const { searchT, watchlistT } = req.body;
-  let search = {ticker: searchT, price: ''};
-  let watchlist = {ticker: watchlistT, price: []};
-  
+  let search = { ticker: searchT, price: "" };
+  let watchlist = { ticker: watchlistT, price: [] };
+
   axios
-    .get(url+searchT)
+    .get(url + searchT)
     .then(resp => {
       const $ = cheerio.load("" + resp.data);
       let price = $('div[id="quote-header-info"]')
@@ -113,12 +113,34 @@ router.get("/updatePrice", (req, res) => {
         .toString();
 
       console.log("price is:", price);
-    
+      search.price = price;
       //return res.json({ success: true, price: price });
     })
     .catch(err => {
       console.log(err);
     });
+  
+  watchlistT.map((ticker) => {
+    axios
+    .get(url + ticker)
+    .then(resp => {
+      const $ = cheerio.load("" + resp.data);
+      let price = $('div[id="quote-header-info"]')
+        .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
+        .text()
+        .toString();
+
+      console.log("price is:", price);
+      
+      watchlist.price.push(price);
+      //return res.json({ success: true, price: price });
+    })
+    .catch(err => {
+      console.log(err);
+    });
+  });
+  
+  return res.json({ success: true, data: [search, watchlist]});
 });
 
 // append /api for our http requests
