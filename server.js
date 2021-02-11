@@ -72,9 +72,10 @@ router.post("/updateWatchlist", (req, res) => {
   });
 });
 
+// this method gets price for a given ticker
 router.get("/getPrice/:ticker?", (req, res) => {
   let url = "https://finance.yahoo.com/quote/";
-  var ticker = req.params.ticker;
+  let ticker = req.params.ticker;
   url = url + ticker;
   console.log(url);
 
@@ -96,65 +97,31 @@ router.get("/getPrice/:ticker?", (req, res) => {
     });
 });
 
-router.post("/updatePrice", (req, res) => {
-  console.log("it got to update!!!");
+// this method buys stock for a given ticker
+router.post("/buyTicker", (req, res) => {
   let url = "https://finance.yahoo.com/quote/";
-  const { tickerArr } = req.body;
+  const { ticker, shares, limitPrice} = req.body;
+  url = url + ticker;
   
-  
-  function updatePrice(tickerArr) {
-    return Promise.all(tickerArr.map(fetchPrice));
-  }
-
-  function fetchPrice(ticker) {
-    return axios
-      .get(url + ticker)
-      .then(function(response) {
-        const $ = cheerio.load("" + response.data);
-        let price = $('div[id="quote-header-info"]')
-          .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
-          .text()
-          .toString();
-        return price;
-      })
-      .catch(function(error) {
-        return { success: false };
-      });
-  }
-
-  updatePrice(tickerArr)
+  axios
+    .get(url)
     .then(resp => {
-      console.log(resp);
-    return res.json({ success: true, data:{ticker: tickerArr, price: resp}});
+      const $ = cheerio.load("" + resp.data);
+      //console.log(resp.data);
+      let price = $('div[id="quote-header-info"]')
+        .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
+        .text()
+        .toString();
+
+      //console.log("price is:", typeof(price));
+      
     })
-    .catch(e => {
-      console.log(e);
+    .catch(err => {
+      console.log(err);
     });
-  //return res.json({ success: true });
-  //         axios
-  //         .get(url)
-  //         .then(resp => {
-  //           const $ = cheerio.load("" + resp.data);
-  //           let price = $('div[id="quote-header-info"]')
-  //             .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
-  //             .text()
-  //             .toString();
+})
 
-  //           console.log("price is:", price);
-  //         })
-  //         .catch(err => {
-  //           console.log(err);
-  //         });
 
-  // return null;
-
-  // updatePrice().then(res => {
-  //   console.log("data is:", data);
-  //   return res.json({ success: true, data: data });
-  // });
-
-  //return res.json({ success: true, data: priceArr });
-});
 
 // append /api for our http requests
 app.use("/", router);
