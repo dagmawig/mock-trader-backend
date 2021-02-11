@@ -53,6 +53,13 @@ router.post("/createUser", (req, res) => {
   });
 });
 
+// this method loads user data
+
+router.get("/loadData:userID?", (req, res) => {
+  let userID = req.params.userID;
+  
+})
+
 // this method updated stock watchlist
 router.post("/updateWatchlist", (req, res) => {
   const { userID, newWatchlist } = req.body;
