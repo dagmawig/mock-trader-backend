@@ -100,7 +100,7 @@ router.get("/getPrice/:ticker?", (req, res) => {
 // this method buys stock for a given ticker
 router.post("/buyTicker", (req, res) => {
   let url = "https://finance.yahoo.com/quote/";
-  const { ticker, shares, limitPrice} = req.body;
+  const { ticker, shares, limitPrice, fund} = req.body;
   url = url + ticker;
   
   axios
@@ -112,8 +112,17 @@ router.post("/buyTicker", (req, res) => {
         .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
         .text()
         .toString();
-
-      //console.log("price is:", typeof(price));
+    
+      price = parseFloat(price);
+    
+      if(limitPrice) {
+        if(price>limitPrice) {
+          return res.json({ success: false, message: "Stock price is higher than limit price!" });
+        }
+        else if(shares*price > fund)
+      }
+    
+    //console.log("price is:", typeof(price));
       
     })
     .catch(err => {
