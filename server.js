@@ -56,24 +56,28 @@ router.post("/createUser", (req, res) => {
 
 // this method loads user data
 
-router.post("/loadData:userID?", (req, res) => {
+router.post("/loadData", (req, res) => {
   const { userID } = req.body;
   
   Data.find({ userID: userID }, (err, data) => {
     
-    if (err) throw err;
+    if (err) res.json({success: false, error: err});
     
-    else if(data.length === 0){
+    if(data.length === 0){
       let data = new Data();
       data.userID = userID;
       
       data.save(err => {
         if (err) return res.json({success: false, error: err});
-        return res.json({ success: true, data: data });
+        console.log("new")
+        res.json({ success: true, data: data });
       });
     }
-    console.log(data)
-    res.json({success: true, data: data});
+    else {
+      console.log("existing")
+      return res.json({success: true, data: data});
+    }
+    
   });
   
   
