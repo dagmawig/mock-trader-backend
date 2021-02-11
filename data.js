@@ -5,9 +5,10 @@ const Schema = mongoose.Schema;
 // this will be our database's data structure 
 const DataSchema = new Schema(
   {
-    userID: {type: String, default: ""},
-    watchlist: {type: Object, default: []},
-    investing: {type: Schema.Types.Mixed, default: {}}
+    userID: { type: String, default: "" },
+    watchlist: { type: Object, default: {ticker: [], price: []} },
+    fund: 10000.00,
+    portfolio: {type: Schema.Types.Mixed, default: {}}
   },
   { timestamps: true, _id: true, minimize: false, strict: false }
 );

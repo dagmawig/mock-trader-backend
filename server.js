@@ -120,7 +120,10 @@ router.post("/buyTicker", (req, res) => {
           return res.json({ success: false, message: `Can not complete transaction! \nStock price $${price} is higher than limit price $${limitPrice}!` });
         }
         else if(shares*price > fund) {
-          return res.json({ success: false, message: `an not complete transaction! \nFunding $${fund} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!` });
+          return res.json({ success: false, message: `Can not complete transaction! \nFunding $${fund} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!` });
+        }
+        else {
+          
         }
       }
     
