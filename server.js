@@ -58,6 +58,10 @@ router.post("/createUser", (req, res) => {
 router.get("/loadData:userID?", (req, res) => {
   let userID = req.params.userID;
   
+  Data.find({ userID: userID }, (err, data) => {
+    if (err) throw err;
+    res.json({success: true, data: data});
+  });
 })
 
 // this method updated stock watchlist
