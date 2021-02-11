@@ -40,8 +40,6 @@ app.get("/", function(req, res) {
   res.sendFile(process.cwd() + "/views/index.html");
 });
 
-// this method checks if logging user is new
-router.get()
 
 // this is our create method
 // this method creates new user in our database
@@ -59,12 +57,16 @@ router.post("/createUser", (req, res) => {
 // this method loads user data
 
 router.get("/loadData:userID?", (req, res) => {
+  console.log("it gets to load")
   let userID = req.params.userID;
-  
+  console.log(userID);
   Data.find({ userID: userID }, (err, data) => {
     if (err) throw err;
+    console.log(data)
     res.json({success: true, data: data});
   });
+  
+  
 })
 
 // this method updated stock watchlist
