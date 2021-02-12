@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 const DataSchema = new Schema(
   {
     userID: { type: String, default: "" },
-    watchlist: { type: Object, default: { ticker: [] } },
+    watchlist: { type: Object, default: { ticker: [], price: [] } },
     fund:  { type: Number,  default: 10000 },
     portfolio: {
       type: Schema.Types.Mixed,

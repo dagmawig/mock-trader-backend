@@ -40,14 +40,13 @@ app.get("/", function(req, res) {
   res.sendFile(process.cwd() + "/views/index.html");
 });
 
-
 // this is our create method
 // this method creates new user in our database
 router.post("/createUser", (req, res) => {
   let data = new Data();
   const { userID } = req.body;
   data.userID = userID;
-  
+
   data.save(err => {
     if (err) return res.json({ success: false, error: err });
     return res.json({ success: true, data: data });
@@ -59,27 +58,44 @@ router.post("/createUser", (req, res) => {
 router.post("/loadData", (req, res) => {
   const { userID } = req.body;
   return Data.find({ userID: userID }, (err, data) => {
-    
-    if (err) res.json({success: false, error: err});
-    
-    if(data.length === 0){
+    if (err) res.json({ success: false, error: err });
+
+    if (data.length === 0) {
       let data = new Data();
       data.userID = userID;
-      
+
       data.save(err => {
-        if (err) res.json({success: false, error: err});
+        if (err) res.json({ success: false, error: err });
         res.json({ success: true, data: data });
       });
+    } else {
+      if (data[0].watchlist.ticker.length !== 0) {
+        data[0].watchlist.ticker.map(tic => {
+          let url = "https://finance.yahoo.com/quote/" + tic;
+
+          axios
+            .get(url)
+            .then(resp => {
+              const $ = cheerio.load("" + resp.data);
+              //console.log(resp.data);
+              let price = $('div[id="quote-header-info"]')
+                .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
+                .text()
+                .toString();
+
+              console.log("price is:", price);
+              data[0].watchlist.price.push(price);
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        });
+      }
+      console.log(data[0].watchlist);
+      res.json({ success: true, data: data });
     }
-    else {
-      console.log(data)
-      res.json({success: true, data: data});
-    }
-    
   });
-  
-  
-})
+});
 
 // this method updated stock watchlist
 router.post("/updateWatchlist", (req, res) => {
@@ -128,9 +144,9 @@ router.get("/getPrice/:ticker?", (req, res) => {
 // this method buys stock for a given ticker
 router.post("/buyTicker", (req, res) => {
   let url = "https://finance.yahoo.com/quote/";
-  const { ticker, shares, limitPrice, fund} = req.body;
+  const { ticker, shares, limitPrice, fund } = req.body;
   url = url + ticker;
-  
+
   axios
     .get(url)
     .then(resp => {
@@ -140,31 +156,30 @@ router.post("/buyTicker", (req, res) => {
         .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
         .text()
         .toString();
-    
+
       price = parseFloat(price);
-    
-      if(limitPrice) {
-        if(price>limitPrice) {
-          return res.json({ success: false, message: `Can not complete transaction! \nStock price $${price} is higher than limit price $${limitPrice}!` });
-        }
-        else if(shares*price > fund) {
-          return res.json({ success: false, message: `Can not complete transaction! \nFunding $${fund} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!` });
-        }
-        else {
-          
+
+      if (limitPrice) {
+        if (price > limitPrice) {
+          return res.json({
+            success: false,
+            message: `Can not complete transaction! \nStock price $${price} is higher than limit price $${limitPrice}!`
+          });
+        } else if (shares * price > fund) {
+          return res.json({
+            success: false,
+            message: `Can not complete transaction! \nFunding $${fund} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
+          });
+        } else {
         }
       }
-    
-    
-    //console.log("price is:", typeof(price));
-      
+
+      //console.log("price is:", typeof(price));
     })
     .catch(err => {
       console.log(err);
     });
-})
-
-
+});
 
 // append /api for our http requests
 app.use("/", router);
