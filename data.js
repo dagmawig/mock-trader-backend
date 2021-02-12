@@ -12,6 +12,7 @@ const DataSchema = new Schema(
       type: Schema.Types.Mixed,
       default: {
         ticker: [],
+        price: [],
         shares: [],
         purchaseP: [],
         averageC: [],

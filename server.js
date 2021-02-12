@@ -91,6 +91,28 @@ router.post("/loadData", (req, res) => {
             });
         });
       }
+      if (data[0].portfolio.ticker.length !== 0) {
+        data[0].watchlist.ticker.map(tic => {
+          let url = "https://finance.yahoo.com/quote/" + tic;
+
+          axios
+            .get(url)
+            .then(resp => {
+              const $ = cheerio.load("" + resp.data);
+              //console.log(resp.data);
+              let price = $('div[id="quote-header-info"]')
+                .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
+                .text()
+                .toString();
+
+              console.log("price is:", price);
+              data[0].portfolio.price.push(price);
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        });
+      }
       console.log(data[0].watchlist);
       res.json({ success: true, data: data });
     }
