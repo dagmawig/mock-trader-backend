@@ -58,8 +58,7 @@ router.post("/createUser", (req, res) => {
 
 router.post("/loadData", (req, res) => {
   const { userID } = req.body;
-  
-  Data.find({ userID: userID }, (err, data) => {
+  return Data.find({ userID: userID }, (err, data) => {
     
     if (err) res.json({success: false, error: err});
     
@@ -68,14 +67,13 @@ router.post("/loadData", (req, res) => {
       data.userID = userID;
       
       data.save(err => {
-        if (err) return res.json({success: false, error: err});
-        console.log("new")
+        if (err) res.json({success: false, error: err});
         res.json({ success: true, data: data });
       });
     }
     else {
-      console.log("existing")
-      return res.json({success: true, data: data});
+      console.log(data)
+      res.json({success: true, data: data});
     }
     
   });
