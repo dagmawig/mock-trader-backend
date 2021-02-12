@@ -166,9 +166,11 @@ router.get("/getPrice/:ticker?", (req, res) => {
 // this method buys stock for a given ticker
 router.post("/buyTicker", (req, res) => {
   let url = "https://finance.yahoo.com/quote/";
-  const { ticker, shares, limitPrice, fund } = req.body;
+  const { userID, ticker, shares, limitPrice } = req.body;
   url = url + ticker;
-
+  
+  
+  /*
   axios
     .get(url)
     .then(resp => {
@@ -193,6 +195,7 @@ router.post("/buyTicker", (req, res) => {
             message: `Can not complete transaction! \nFunding $${fund} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
           });
         } else {
+          
         }
       }
 
@@ -200,7 +203,7 @@ router.post("/buyTicker", (req, res) => {
     })
     .catch(err => {
       console.log(err);
-    });
+    }); */
 });
 
 // append /api for our http requests
