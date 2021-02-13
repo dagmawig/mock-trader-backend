@@ -69,11 +69,11 @@ async function fetchPrice(ticker) {
         .toString();
 
       console.log("fetch price is:", price);
+      return price;
     })
     .catch(err => {
       console.log(err);
     });
-  
   return res;
 }
 
@@ -166,31 +166,11 @@ router.post("/updateWatchlist", (req, res) => {
 router.get("/getPrice/:ticker?", (req, res) => {
   let url = "https://finance.yahoo.com/quote/";
   let ticker = req.params.ticker;
-  url = url + ticker;
-  console.log(url);
 
-//   axios
-//     .get(url)
-//     .then(resp => {
-//       const $ = cheerio.load("" + resp.data);
-//       //console.log(resp.data);
-//       let price = $('div[id="quote-header-info"]')
-//         .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
-//         .text()
-//         .toString();
-
-//       console.log("price is:", price);
-//       return res.json({ success: true, price: price });
-//     })
-//     .catch(err => {
-//       console.log(err);
-//     });
-  
-  fetchPrice(ticker)
-  .then(price => {
-    console.log("f price is", price.data)
-    return res.json({ success: true, price: price.data})
-  })
+  fetchPrice(ticker).then(price => {
+    console.log("f price is", price);
+    return res.json({ success: true, price: price });
+  });
 });
 
 // this method buys stock for a given ticker
@@ -198,6 +178,11 @@ router.post("/buyTicker", (req, res) => {
   let url = "https://finance.yahoo.com/quote/";
   const { userID, ticker, shares, limitPrice } = req.body;
   url = url + ticker;
+  
+  fetchPrice(ticker)
+  .then(price => {
+    
+  })
 
   /*
   axios
@@ -210,7 +195,7 @@ router.post("/buyTicker", (req, res) => {
         .text()
         .toString();
 
-      price = parseFloat(price);
+      price = parseFloat(price.replace(',', ''));
 
       if (limitPrice) {
         if (price > limitPrice) {
