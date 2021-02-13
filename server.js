@@ -53,6 +53,13 @@ router.post("/createUser", (req, res) => {
   });
 });
 
+// this method formats stock price to two decimal deigits
+function formatNum(x) {
+        x=parseFloat(x)
+        x = x.toFixed(2);
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
 //this method fetches price
 
 async function fetchPrice(ticker) {
@@ -180,8 +187,8 @@ router.post("/buyTicker", (req, res) => {
   url = url + ticker;
 
   Data.find({ userID: userID }, (err, data) => {
-    let fund = data.fund;
-  console.log(fund)
+    let fund = data[0].fund;
+    
     fetchPrice(ticker).then(price => {
       
       let p = parseFloat(price.replace(",", ""));
@@ -190,12 +197,12 @@ router.post("/buyTicker", (req, res) => {
         if (p > limitPrice) {
           return res.json({
             success: false,
-            message: `Can not complete transaction! \nStock price $${price} is higher than limit price $${limitPrice}!`
+            message: `Can not complete transaction! \nStock price $${price} is higher than limit price $${formatNum(limitPrice)}!`
           });
         } else if (shares * p > fund) {
           return res.json({
             success: false,
-            message: `Can not complete transaction! \nFunding $${fund} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
+            message: `Can not complete transaction! \nFunding $${formatNum(fund)} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
           });
         } else {
         }
