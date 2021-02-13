@@ -100,23 +100,15 @@ async function fetchPArray(arr) {
 //   console.log("data is ", data);
 // });
 
-let pArr = [];
 fetchPArray(["BA", "TSLA"]).then(resp=> {
   console.log(resp);
   Promise.all(resp). then(val => {
     console.log(val);
   })
-  // resp.map(x => {
-  //   x.then(y => {
-  //     console.log("PPPPRICE", y);
-  //     pArr.push(y);
-  //   })
-  // }   
+
 })
 
-if(pArr.length == 2){
-  console.log(pArr);
-} 
+
   
 
 
@@ -136,7 +128,12 @@ router.post("/loadData", (req, res) => {
         res.json({ success: true, data: [data] });
       });
     } else {
+      let pSize = data[0].portfolio.ticker.length;
+      let wSize = data[0].watchlist.ticker.length;
       
+      let ticArr = data[0].portfolio.ticker.concat(data[0].watchlist.ticker);
+      
+      fetch
 //       async function getPrices() {
 //         if (data[0].watchlist.ticker.length !== 0) {
 //           var wPrices = await data[0].watchlist.ticker.map(tic => {
