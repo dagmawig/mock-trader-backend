@@ -125,44 +125,17 @@ router.post("/loadData", (req, res) => {
         Promise.all(resp).then(val => {
           let pPriceArr = val.slice(0,  pSize);
           let wPriceArr = val.slice(pSize);
+          
           let newData = {
             fund: data[0].fund,
             watchlist: {ticker: wTicker, price: wPriceArr},
-            portfolio: {ticker: pTicker, price: pPriceArr, shares: data[0].portfolio.shares, purchase}
+            portfolio: {ticker: pTicker, price: pPriceArr, shares: data[0].portfolio.shares, averageC: data[0].portfolio.averageC}
           }
           console.log("looooaded data is", data);
-          res.json({success: true, data: data});
+          res.json({success: true, data: newData});
         })
       })
-//       async function getPrices() {
-//         if (data[0].watchlist.ticker.length !== 0) {
-//           var wPrices = await data[0].watchlist.ticker.map(tic => {
-//             fetchPrice(tic).then(price => {
-//               console.log("watch price is:", price);
-//               data[0].watchlist.price.push(price);
-//               return price;
-//             });
-//           });
-//         }
-
-//         if (data[0].watchlist.ticker.length !== 0) {
-//           var pPrices = await data[0].portfolio.ticker.map(tic => {
-//             fetchPrice(tic).then(price => {
-//               console.log("port price is:", price);
-//               data[0].portfolio.price.push(price);
-//               return price;
-//             });
-//           });
-//         }
-//         return { w: wPrices, p: pPrices };
-//       }
-
-//       getPrices().then(response => {
-//         console.log("resp format", response)
-        
-//       });
     }
-    return res.json({success: true, data: data})
   });
 });
 
