@@ -107,11 +107,14 @@ router.post("/loadData", (req, res) => {
           fetchPrice(tic).then(price => {
             console.log("price is:", price);
             data[0].watchlist.price.push(price);
+          })
+          .then(() => {
+            
           });
         });
       }
       if (data[0].portfolio.ticker.length !== 0) {
-        data[0].watchlist.ticker.map(tic => {
+        data[0].portfolio.ticker.map(tic => {
           fetchPrice(tic).then(price => {
             console.log("port price is:", price);
             data[0].portfolio.price.push(price);
@@ -119,7 +122,7 @@ router.post("/loadData", (req, res) => {
         });
       }
       console.log("old data", data);
-      res.json({ success: true, data: data });
+      return res.json({ success: true, data: data });
     }
   });
 });
