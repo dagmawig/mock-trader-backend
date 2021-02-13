@@ -178,11 +178,30 @@ router.post("/buyTicker", (req, res) => {
   let url = "https://finance.yahoo.com/quote/";
   const { userID, ticker, shares, limitPrice } = req.body;
   url = url + ticker;
-  
-  fetchPrice(ticker)
-  .then(price => {
-    
-  })
+
+  Data.find({ userID: userID }, (err, data) => {
+    let fund = data.fund;
+  console.log(fund)
+    fetchPrice(ticker).then(price => {
+      
+      let p = parseFloat(price.replace(",", ""));
+
+      if (limitPrice) {
+        if (p > limitPrice) {
+          return res.json({
+            success: false,
+            message: `Can not complete transaction! \nStock price $${price} is higher than limit price $${limitPrice}!`
+          });
+        } else if (shares * p > fund) {
+          return res.json({
+            success: false,
+            message: `Can not complete transaction! \nFunding $${fund} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
+          });
+        } else {
+        }
+      }
+    });
+  });
 
   /*
   axios
