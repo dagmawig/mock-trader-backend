@@ -99,30 +99,33 @@ router.post("/loadData", (req, res) => {
       console.log("new data", data);
       data.save(err => {
         if (err) res.json({ success: false, error: err });
-        res.json({ success: true, data:  [data] });
+        res.json({ success: true, data: [data] });
       });
     } else {
       if (data[0].watchlist.ticker.length !== 0) {
         data[0].watchlist.ticker.map(tic => {
-          fetchPrice(tic).then(price => {
-            console.log("price is:", price);
-            data[0].watchlist.price.push(price);
-          })
-          .then(() => {
-            
-          });
-        });
-      }
-      if (data[0].portfolio.ticker.length !== 0) {
-        data[0].portfolio.ticker.map(tic => {
-          fetchPrice(tic).then(price => {
-            console.log("port price is:", price);
-            data[0].portfolio.price.push(price);
-          });
+          fetchPrice(tic)
+            .then(price => {
+              console.log("watch price is:", price);
+              data[0].watchlist.price.push(price);
+            })
+            .then(() => {
+              if (data[0].portfolio.ticker.length !== 0) {
+                console.log("there is port");
+                data[0].portfolio.ticker.map(tic => {
+                  fetchPrice(tic).then(price => {
+                    console.log("port price is:", price);
+                    data[0].portfolio.price.push(price);
+                  });
+                });
+              }
+            })
+            .then(() => {
+              return res.json({ success: true, data: data });
+            });
         });
       }
       console.log("old data", data);
-      return res.json({ success: true, data: data });
     }
   });
 });
@@ -166,9 +169,9 @@ router.post("/buyTicker", (req, res) => {
 
     fetchPrice(ticker).then(price => {
       let p = parseFloat(price.replace(",", ""));
-      
+
       const { userID, ticker, shares, limitPrice } = req.body;
-      
+
       if (limitPrice) {
         if (p > limitPrice) {
           return res.json({
@@ -194,35 +197,42 @@ router.post("/buyTicker", (req, res) => {
             portfolio.averageC.push(price);
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
             Data.findOneAndUpdate(
-              {userID: userID },
+              { userID: userID },
               { $set: { portfolio: portfolio } },
               { new: true },
               (err, data) => {
-                if(err) throw err;
-                return res.json({ success: true, data: {data: data, message: message}});
+                if (err) throw err;
+                return res.json({
+                  success: true,
+                  data: { data: data, message: message }
+                });
               }
-            )
-          }
-          else {
+            );
+          } else {
             let index = portfolio.ticker.indexOf(ticker.toUpperCase());
             let newShares = portfolio.shares[index] + shares;
-            let cost = (portfolio.shares[index]*portfolio.averageC[index] + shares*p)/(newShares);
+            let cost =
+              (portfolio.shares[index] * portfolio.averageC[index] +
+                shares * p) /
+              newShares;
             portfolio.shares[index] = newShares;
             portfolio.averageC[index] = cost;
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
             Data.findOneAndUpdate(
-              {userID: userID },
+              { userID: userID },
               { $set: { portfolio: portfolio } },
               { new: true },
               (err, data) => {
-                if(err) throw err;
-                return res.json({ success: true, data: {data: data, message: message}});
+                if (err) throw err;
+                return res.json({
+                  success: true,
+                  data: { data: data, message: message }
+                });
               }
-            )
+            );
           }
         }
-      }
-      else {
+      } else {
         if (shares * p > fund) {
           return res.json({
             success: false,
@@ -230,8 +240,7 @@ router.post("/buyTicker", (req, res) => {
               fund
             )} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
           });
-        }
-        else {
+        } else {
           fund = fund - shares * p;
           let portfolio = data[0].portfolio;
 
@@ -241,31 +250,39 @@ router.post("/buyTicker", (req, res) => {
             portfolio.averageC.push(price);
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
             Data.findOneAndUpdate(
-              {userID: userID },
+              { userID: userID },
               { $set: { portfolio: portfolio } },
               { new: true },
               (err, data) => {
-                if(err) throw err;
-                return res.json({ success: true, data: {data: data, message: message}});
+                if (err) throw err;
+                return res.json({
+                  success: true,
+                  data: { data: data, message: message }
+                });
               }
-            )
-          }
-          else {
+            );
+          } else {
             let index = portfolio.ticker.indexOf(ticker.toUpperCase());
             let newShares = portfolio.shares[index] + shares;
-            let cost = (portfolio.shares[index]*portfolio.averageC[index] + shares*p)/(newShares);
+            let cost =
+              (portfolio.shares[index] * portfolio.averageC[index] +
+                shares * p) /
+              newShares;
             portfolio.shares[index] = newShares;
             portfolio.averageC[index] = cost;
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
             Data.findOneAndUpdate(
-              {userID: userID },
+              { userID: userID },
               { $set: { portfolio: portfolio } },
               { new: true },
               (err, data) => {
-                if(err) throw err;
-                return res.json({ success: true, data: {data: data, message: message}});
+                if (err) throw err;
+                return res.json({
+                  success: true,
+                  data: { data: data, message: message }
+                });
               }
-            )
+            );
           }
         }
       }
