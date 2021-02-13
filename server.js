@@ -110,7 +110,7 @@ router.post("/loadData", (req, res) => {
       console.log("new data", data);
       data.save(err => {
         if (err) res.json({ success: false, error: err });
-        res.json({ success: true, data: [data] });
+        res.json({ success: true, data: data });
       });
     } else {
       
@@ -198,7 +198,7 @@ router.post("/buyTicker", (req, res) => {
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
             Data.findOneAndUpdate(
               { userID: userID },
-              { $set: { portfolio: portfolio } },
+              { $set: { portfolio: portfolio, fund: fund } },
               { new: true },
               (err, data) => {
                 if (err) throw err;
@@ -220,7 +220,7 @@ router.post("/buyTicker", (req, res) => {
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
             Data.findOneAndUpdate(
               { userID: userID },
-              { $set: { portfolio: portfolio } },
+              { $set: { portfolio: portfolio, fund: fund } },
               { new: true },
               (err, data) => {
                 if (err) throw err;
@@ -251,7 +251,7 @@ router.post("/buyTicker", (req, res) => {
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
             Data.findOneAndUpdate(
               { userID: userID },
-              { $set: { portfolio: portfolio } },
+              { $set: { portfolio: portfolio, fund: fund } },
               { new: true },
               (err, data) => {
                 if (err) throw err;
@@ -273,7 +273,7 @@ router.post("/buyTicker", (req, res) => {
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
             Data.findOneAndUpdate(
               { userID: userID },
-              { $set: { portfolio: portfolio } },
+              { $set: { portfolio: portfolio, fund: fund } },
               { new: true },
               (err, data) => {
                 if (err) throw err;
