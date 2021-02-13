@@ -103,54 +103,34 @@ router.post("/loadData", (req, res) => {
       });
     } else {
       async function getPrices() {
-        
         if (data[0].watchlist.ticker.length !== 0) {
           var wPrices = await data[0].watchlist.ticker.map(tic => {
             fetchPrice(tic).then(price => {
               console.log("watch price is:", price);
+              data[0].watchlist.price.push(price);
               return price;
-              //data[0].watchlist.price.push(price);
             });
           });
         }
-        
+
         if (data[0].watchlist.ticker.length !== 0) {
           var pPrices = await data[0].portfolio.ticker.map(tic => {
             fetchPrice(tic).then(price => {
               console.log("port price is:", price);
+              data[0].portfolio.price.push(price);
               return price;
-              //data[0].watchlist.price.push(price);
             });
           });
         }
-        return {w: wPrices, p: pPrices}
+        return { w: wPrices, p: pPrices };
       }
-      
 
-      if (data[0].watchlist.ticker.length !== 0) {
-        data[0].watchlist.ticker.map(tic => {
-          fetchPrice(tic).then(price => {
-            console.log("watch price is:", price);
-            data[0].watchlist.price.push(price);
-          });
-          // .then(() => {
-          //   if (data[0].portfolio.ticker.length !== 0) {
-          //     console.log("there is port");
-          //     data[0].portfolio.ticker.map(tic => {
-          //       fetchPrice(tic).then(price => {
-          //         console.log("port price is:", price);
-          //         data[0].portfolio.price.push(price);
-          //       });
-          //     });
-          //   }
-          // })
-          // .then(() => {
-          //   return res.json({ success: true, data: data });
-          // });
-        });
-      }
-      console.log("old data", data);
+      getPrices().then(response => {
+        console.log("resp format", response)
+        
+      });
     }
+    return res.json({success: true, data: data})
   });
 });
 
