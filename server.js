@@ -190,7 +190,19 @@ router.post("/buyTicker", (req, res) => {
             portfolio.purchaseP.push(price);
             portfolio.shares.push(shares);
             portfolio.averageC.push(price);
-            
+            let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`
+            Data.findOneAndUpdate(
+              {userID: userID },
+              { $set: { portfolio: portfolio } },
+              { new: true },
+              (err, data) => {
+                if(err) throw err;
+                return res.json({ success: true, data: {data: data, message: message}});
+              }
+            )
+          }
+          else {
+            let index = portfolio.ticker.indexOf(ticker.toUpperCase());
             
           }
         }
