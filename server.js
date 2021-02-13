@@ -58,7 +58,7 @@ router.post("/createUser", (req, res) => {
 async function fetchPrice(ticker) {
   let url = "https://finance.yahoo.com/quote/" + ticker;
 
-  axios
+  let res = axios
     .get(url)
     .then(resp => {
       const $ = cheerio.load("" + resp.data);
@@ -68,12 +68,13 @@ async function fetchPrice(ticker) {
         .text()
         .toString();
 
-      console.log("price is:", price);
-      return price;
+      console.log("fetch price is:", price);
     })
     .catch(err => {
       console.log(err);
     });
+  
+  return res;
 }
 
 // this method loads user data
@@ -168,22 +169,28 @@ router.get("/getPrice/:ticker?", (req, res) => {
   url = url + ticker;
   console.log(url);
 
-  axios
-    .get(url)
-    .then(resp => {
-      const $ = cheerio.load("" + resp.data);
-      //console.log(resp.data);
-      let price = $('div[id="quote-header-info"]')
-        .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
-        .text()
-        .toString();
+//   axios
+//     .get(url)
+//     .then(resp => {
+//       const $ = cheerio.load("" + resp.data);
+//       //console.log(resp.data);
+//       let price = $('div[id="quote-header-info"]')
+//         .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
+//         .text()
+//         .toString();
 
-      console.log("price is:", price);
-      return res.json({ success: true, price: price });
-    })
-    .catch(err => {
-      console.log(err);
-    });
+//       console.log("price is:", price);
+//       return res.json({ success: true, price: price });
+//     })
+//     .catch(err => {
+//       console.log(err);
+//     });
+  
+  fetchPrice(ticker)
+  .then(price => {
+    console.log("f price is", price.data)
+    return res.json({ success: true, price: price.data})
+  })
 });
 
 // this method buys stock for a given ticker
