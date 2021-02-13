@@ -86,6 +86,20 @@ async function fetchPrice(ticker) {
   return res;
 }
 
+// this methos return array of prices given array of tickers
+async function fetchPArray(arr) {
+  let res = await arr.map(tic => {
+    return fetchPrice(tic).resolved();
+    //return tic+"l";
+  });
+  
+  return res;
+}
+
+fetchPArray(["BA", "TSLA"]).then(resp=> {
+  console.log(resp);
+})
+
 // this method loads user data
 
 router.post("/loadData", (req, res) => {
@@ -103,7 +117,6 @@ router.post("/loadData", (req, res) => {
       });
     } else {
       
-      Data.find
 //       async function getPrices() {
 //         if (data[0].watchlist.ticker.length !== 0) {
 //           var wPrices = await data[0].watchlist.ticker.map(tic => {
