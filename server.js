@@ -100,10 +100,15 @@ async function fetchPArray(arr) {
 //   console.log("data is ", data);
 // });
 fetchPArray(["BA", "TSLA"]).then(resp=> {
-  resp.then(data => {
-    console.log(data)
-  });
-}).
+  resp.map(x => {
+    //console.log("x is", x)
+    x.then(y => {
+      console.log("PPPPRICE", y);
+    })
+  })
+  
+  
+})
 
 // this method loads user data
 
