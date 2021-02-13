@@ -99,16 +99,26 @@ async function fetchPArray(arr) {
 // fetchPrice("BA").then(data=> {
 //   console.log("data is ", data);
 // });
+
+let pArr = [];
 fetchPArray(["BA", "TSLA"]).then(resp=> {
-  resp.map(x => {
-    //console.log("x is", x)
-    x.then(y => {
-      console.log("PPPPRICE", y);
-    })
+  console.log(resp);
+  Promise.all(resp). then(val => {
+    console.log(val);
   })
-  
-  
+  // resp.map(x => {
+  //   x.then(y => {
+  //     console.log("PPPPRICE", y);
+  //     pArr.push(y);
+  //   })
+  // }   
 })
+
+if(pArr.length == 2){
+  console.log(pArr);
+} 
+  
+
 
 // this method loads user data
 
