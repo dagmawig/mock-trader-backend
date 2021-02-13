@@ -113,7 +113,7 @@ router.post("/loadData", (req, res) => {
       if (data[0].portfolio.ticker.length !== 0) {
         data[0].watchlist.ticker.map(tic => {
           fetchPrice(tic).then(price => {
-            console.log("price is:", price);
+            console.log("port price is:", price);
             data[0].portfolio.price.push(price);
           });
         });
