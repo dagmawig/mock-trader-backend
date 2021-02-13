@@ -53,6 +53,29 @@ router.post("/createUser", (req, res) => {
   });
 });
 
+//this method fetches price
+
+async function fetchPrice(ticker) {
+  let url = "https://finance.yahoo.com/quote/" + ticker;
+
+  axios
+    .get(url)
+    .then(resp => {
+      const $ = cheerio.load("" + resp.data);
+      //console.log(resp.data);
+      let price = $('div[id="quote-header-info"]')
+        .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
+        .text()
+        .toString();
+
+      console.log("price is:", price);
+      return price;
+    })
+    .catch(err => {
+      console.log(err);
+    });
+}
+
 // this method loads user data
 
 router.post("/loadData", (req, res) => {
@@ -168,8 +191,7 @@ router.post("/buyTicker", (req, res) => {
   let url = "https://finance.yahoo.com/quote/";
   const { userID, ticker, shares, limitPrice } = req.body;
   url = url + ticker;
-  
-  
+
   /*
   axios
     .get(url)
