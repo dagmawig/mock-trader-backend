@@ -156,16 +156,16 @@ router.get("/getPrice/:ticker?", (req, res) => {
 
 // this method buys stock for a given ticker
 router.post("/buyTicker", (req, res) => {
-  let url = "https://finance.yahoo.com/quote/";
-  const { userID, ticker, shares, limitPrice } = req.body;
-  url = url + ticker;
+  const { userID, ticker } = req.body;
 
   Data.find({ userID: userID }, (err, data) => {
     let fund = data[0].fund;
 
     fetchPrice(ticker).then(price => {
       let p = parseFloat(price.replace(",", ""));
-
+      
+      const { userID, ticker, shares, limitPrice } = req.body;
+      
       if (limitPrice) {
         if (p > limitPrice) {
           return res.json({
