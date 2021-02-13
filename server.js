@@ -96,10 +96,10 @@ router.post("/loadData", (req, res) => {
     if (data.length === 0) {
       let data = new Data();
       data.userID = userID;
-
+      console.log("new data", data);
       data.save(err => {
         if (err) res.json({ success: false, error: err });
-        res.json({ success: true, data: data });
+        res.json({ success: true, data: {data: [data]} });
       });
     } else {
       if (data[0].watchlist.ticker.length !== 0) {
@@ -118,7 +118,7 @@ router.post("/loadData", (req, res) => {
           });
         });
       }
-      console.log(data[0].watchlist);
+      console.log("old data", data);
       res.json({ success: true, data: data });
     }
   });
