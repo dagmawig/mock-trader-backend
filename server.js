@@ -29,7 +29,7 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true
 });
 
-mongoose.set('useFindAndModify', false);
+mongoose.set("useFindAndModify", false);
 
 let db = mongoose.connection;
 
@@ -57,10 +57,10 @@ router.post("/createUser", (req, res) => {
 
 // this method formats stock price to two decimal deigits
 function formatNum(x) {
-        x=parseFloat(x)
-        x = x.toFixed(2);
-        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
+  x = parseFloat(x);
+  x = x.toFixed(2);
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
 //this method fetches price
 
@@ -104,51 +104,18 @@ router.post("/loadData", (req, res) => {
     } else {
       if (data[0].watchlist.ticker.length !== 0) {
         data[0].watchlist.ticker.map(tic => {
-          let url = "https://finance.yahoo.com/quote/" + tic;
-          
-          fetchPrice(tic)
-          .then(price => {
+          fetchPrice(tic).then(price => {
             console.log("price is:", price);
             data[0].watchlist.price.push(price);
-          })
-//           axios
-//             .get(url)
-//             .then(resp => {
-//               const $ = cheerio.load("" + resp.data);
-//               //console.log(resp.data);
-//               let price = $('div[id="quote-header-info"]')
-//                 .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
-//                 .text()
-//                 .toString();
-
-//               console.log("price is:", price);
-//               data[0].watchlist.price.push(price);
-//             })
-//             .catch(err => {
-//               console.log(err);
-//             });
+          });
         });
       }
       if (data[0].portfolio.ticker.length !== 0) {
         data[0].watchlist.ticker.map(tic => {
-          let url = "https://finance.yahoo.com/quote/" + tic;
-
-          axios
-            .get(url)
-            .then(resp => {
-              const $ = cheerio.load("" + resp.data);
-              //console.log(resp.data);
-              let price = $('div[id="quote-header-info"]')
-                .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
-                .text()
-                .toString();
-
-              console.log("price is:", price);
-              data[0].portfolio.price.push(price);
-            })
-            .catch(err => {
-              console.log(err);
-            });
+          fetchPrice(tic).then(price => {
+            console.log("price is:", price);
+            data[0].portfolio.price.push(price);
+          });
         });
       }
       console.log(data[0].watchlist);
@@ -195,37 +162,41 @@ router.post("/buyTicker", (req, res) => {
 
   Data.find({ userID: userID }, (err, data) => {
     let fund = data[0].fund;
-    
+
     fetchPrice(ticker).then(price => {
-      
       let p = parseFloat(price.replace(",", ""));
 
       if (limitPrice) {
         if (p > limitPrice) {
           return res.json({
             success: false,
-            message: `Can not complete transaction! \nStock price $${price} is higher than limit price $${formatNum(limitPrice)}!`
+            message: `Can not complete transaction! \nStock price $${price} is higher than limit price $${formatNum(
+              limitPrice
+            )}!`
           });
         } else if (shares * p > fund) {
           return res.json({
             success: false,
-            message: `Can not complete transaction! \nFunding $${formatNum(fund)} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
+            message: `Can not complete transaction! \nFunding $${formatNum(
+              fund
+            )} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
           });
         } else {
-          fund = fund- (shares*p);
+          fund = fund - shares * p;
           let portfolio = data[0].portfolio;
-          
-          if(!portfolio.ticker.includes(ticker.toUpperCase())) {
+
+          if (!portfolio.ticker.includes(ticker.toUpperCase())) {
             portfolio.ticker.push(ticker.toUpperCase());
-            portfolio.price.push()
+            portfolio.purchaseP.push(price);
+            portfolio.shares.push(shares);
+            portfolio.averageC.push(price);
+            
+            
           }
-          
         }
       }
     });
   });
-
-  
 });
 
 // append /api for our http requests
