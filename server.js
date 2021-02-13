@@ -105,23 +105,28 @@ router.post("/loadData", (req, res) => {
       if (data[0].watchlist.ticker.length !== 0) {
         data[0].watchlist.ticker.map(tic => {
           let url = "https://finance.yahoo.com/quote/" + tic;
+          
+          fetchPrice(tic)
+          .then(price => {
+            console.log("price is:", price);
+            data[0].watchlist.price.push(price);
+          })
+//           axios
+//             .get(url)
+//             .then(resp => {
+//               const $ = cheerio.load("" + resp.data);
+//               //console.log(resp.data);
+//               let price = $('div[id="quote-header-info"]')
+//                 .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
+//                 .text()
+//                 .toString();
 
-          axios
-            .get(url)
-            .then(resp => {
-              const $ = cheerio.load("" + resp.data);
-              //console.log(resp.data);
-              let price = $('div[id="quote-header-info"]')
-                .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
-                .text()
-                .toString();
-
-              console.log("price is:", price);
-              data[0].watchlist.price.push(price);
-            })
-            .catch(err => {
-              console.log(err);
-            });
+//               console.log("price is:", price);
+//               data[0].watchlist.price.push(price);
+//             })
+//             .catch(err => {
+//               console.log(err);
+//             });
         });
       }
       if (data[0].portfolio.ticker.length !== 0) {
@@ -208,6 +213,12 @@ router.post("/buyTicker", (req, res) => {
           });
         } else {
           fund = fund- (shares*p);
+          let portfolio = data[0].portfolio;
+          
+          if(!portfolio.ticker.includes(ticker.toUpperCase())) {
+            portfolio.ticker.push(ticker.toUpperCase());
+            portfolio.price.push()
+          }
           
         }
       }
