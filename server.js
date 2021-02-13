@@ -29,6 +29,8 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true
 });
 
+mongoose.set('useFindAndModify', false);
+
 let db = mongoose.connection;
 
 db.once("open", () => console.log("connected to database"));
@@ -162,7 +164,7 @@ router.post("/updateWatchlist", (req, res) => {
       { new: true },
       (err, data) => {
         if (err) throw err;
-        console.log("Data after update: ", data);
+        //console.log("Data after update: ", data);
         return res.json({ success: true, watchlist: data.watchlist });
       }
     );
@@ -205,45 +207,14 @@ router.post("/buyTicker", (req, res) => {
             message: `Can not complete transaction! \nFunding $${formatNum(fund)} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
           });
         } else {
+          fund = fund- (shares*p);
+          
         }
       }
     });
   });
 
-  /*
-  axios
-    .get(url)
-    .then(resp => {
-      const $ = cheerio.load("" + resp.data);
-      //console.log(resp.data);
-      let price = $('div[id="quote-header-info"]')
-        .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
-        .text()
-        .toString();
-
-      price = parseFloat(price.replace(',', ''));
-
-      if (limitPrice) {
-        if (price > limitPrice) {
-          return res.json({
-            success: false,
-            message: `Can not complete transaction! \nStock price $${price} is higher than limit price $${limitPrice}!`
-          });
-        } else if (shares * price > fund) {
-          return res.json({
-            success: false,
-            message: `Can not complete transaction! \nFunding $${fund} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
-          });
-        } else {
-          
-        }
-      }
-
-      //console.log("price is:", typeof(price));
-    })
-    .catch(err => {
-      console.log(err);
-    }); */
+  
 });
 
 // append /api for our http requests
