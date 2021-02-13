@@ -187,10 +187,9 @@ router.post("/buyTicker", (req, res) => {
 
           if (!portfolio.ticker.includes(ticker.toUpperCase())) {
             portfolio.ticker.push(ticker.toUpperCase());
-            portfolio.purchaseP.push(price);
             portfolio.shares.push(shares);
             portfolio.averageC.push(price);
-            let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`
+            let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
             Data.findOneAndUpdate(
               {userID: userID },
               { $set: { portfolio: portfolio } },
@@ -203,7 +202,20 @@ router.post("/buyTicker", (req, res) => {
           }
           else {
             let index = portfolio.ticker.indexOf(ticker.toUpperCase());
-            
+            let newShares = portfolio.shares[index] + shares;
+            let cost = (portfolio.shares[index]*portfolio.averageC[index] + shares*p)/(newShares);
+            portfolio.shares[index] = newShares;
+            portfolio.averageC[index] = cost;
+            let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
+            Data.findOneAndUpdate(
+              {userID: userID },
+              { $set: { portfolio: portfolio } },
+              { new: true },
+              (err, data) => {
+                if(err) throw err;
+                return res.json({ success: true, data: {data: data, message: message}});
+              }
+            )
           }
         }
       }

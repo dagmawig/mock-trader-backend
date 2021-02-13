@@ -14,9 +14,7 @@ const DataSchema = new Schema(
         ticker: [],
         price: [],
         shares: [],
-        purchaseP: [],
         averageC: [],
-        purchaseD: []
       }
     }
   },
