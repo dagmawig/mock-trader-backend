@@ -99,7 +99,7 @@ router.post("/loadData", (req, res) => {
       console.log("new data", data);
       data.save(err => {
         if (err) res.json({ success: false, error: err });
-        res.json({ success: true, data: {data: [data]} });
+        res.json({ success: true, data:  [data] });
       });
     } else {
       if (data[0].watchlist.ticker.length !== 0) {
