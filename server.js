@@ -113,15 +113,23 @@ router.post("/loadData", (req, res) => {
         res.json({ success: true, data: [data] });
       });
     } else {
-      let pSize = data[0].portfolio.ticker.length;
-      let wSize = data[0].watchlist.ticker.length;
+      let pTicker = data[0].portfolio.ticker;
+      let wTicker = data[0].watchlist.ticker;
+      let pSize = pTicker.length;
+      let wSize = wTicker.length;
+      
       
       let ticArr = data[0].portfolio.ticker.concat(data[0].watchlist.ticker);
       
       fetchPArray(ticArr).then(resp => {
         Promise.all(resp).then(val => {
-          data[0].portfolio.price = val.slice(0,  pSize);
-          data[0].watchlist.price = val.slice(pSize);
+          let pPriceArr = val.slice(0,  pSize);
+          let wPriceArr = val.slice(pSize);
+          let newData = {
+            fund: data[0].fund,
+            watchlist: {ticker: wTicker, price: wPriceArr},
+            portfolio: {ticker: pTicker, price: pPriceArr, shares: data[0].portfolio.shares, purchase}
+          }
           console.log("looooaded data is", data);
           res.json({success: true, data: data});
         })
