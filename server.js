@@ -89,16 +89,21 @@ async function fetchPrice(ticker) {
 // this methos return array of prices given array of tickers
 async function fetchPArray(arr) {
   let res = await arr.map(tic => {
-    return fetchPrice(tic).resolved();
+    return fetchPrice(tic);
     //return tic+"l";
   });
   
   return res;
 }
 
+// fetchPrice("BA").then(data=> {
+//   console.log("data is ", data);
+// });
 fetchPArray(["BA", "TSLA"]).then(resp=> {
-  console.log(resp);
-})
+  resp.then(data => {
+    console.log(data)
+  });
+}).
 
 // this method loads user data
 
