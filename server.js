@@ -102,36 +102,51 @@ router.post("/loadData", (req, res) => {
         res.json({ success: true, data: [data] });
       });
     } else {
-      
       async function getPrices() {
-        let wPrice = await data[0].watchlist.ticker.map(tic => {
-          fetchPrice(tic)
-            .then(price => {
+        
+        if (data[0].watchlist.ticker.length !== 0) {
+          var wPrices = await data[0].watchlist.ticker.map(tic => {
+            fetchPrice(tic).then(price => {
               console.log("watch price is:", price);
-              data[0].watchlist.price.push(price);
-            })
+              return price;
+              //data[0].watchlist.price.push(price);
+            });
+          });
+        }
+        
+        if (data[0].watchlist.ticker.length !== 0) {
+          var pPrices = await data[0].portfolio.ticker.map(tic => {
+            fetchPrice(tic).then(price => {
+              console.log("port price is:", price);
+              return price;
+              //data[0].watchlist.price.push(price);
+            });
+          });
+        }
+        return {w: wPrices, p: pPrices}
       }
+      
+
       if (data[0].watchlist.ticker.length !== 0) {
         data[0].watchlist.ticker.map(tic => {
-          fetchPrice(tic)
-            .then(price => {
-              console.log("watch price is:", price);
-              data[0].watchlist.price.push(price);
-            })
-            // .then(() => {
-            //   if (data[0].portfolio.ticker.length !== 0) {
-            //     console.log("there is port");
-            //     data[0].portfolio.ticker.map(tic => {
-            //       fetchPrice(tic).then(price => {
-            //         console.log("port price is:", price);
-            //         data[0].portfolio.price.push(price);
-            //       });
-            //     });
-            //   }
-            // })
-            // .then(() => {
-            //   return res.json({ success: true, data: data });
-            // });
+          fetchPrice(tic).then(price => {
+            console.log("watch price is:", price);
+            data[0].watchlist.price.push(price);
+          });
+          // .then(() => {
+          //   if (data[0].portfolio.ticker.length !== 0) {
+          //     console.log("there is port");
+          //     data[0].portfolio.ticker.map(tic => {
+          //       fetchPrice(tic).then(price => {
+          //         console.log("port price is:", price);
+          //         data[0].portfolio.price.push(price);
+          //       });
+          //     });
+          //   }
+          // })
+          // .then(() => {
+          //   return res.json({ success: true, data: data });
+          // });
         });
       }
       console.log("old data", data);
