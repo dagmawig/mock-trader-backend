@@ -90,26 +90,11 @@ async function fetchPrice(ticker) {
 async function fetchPArray(arr) {
   let res = await arr.map(tic => {
     return fetchPrice(tic);
-    //return tic+"l";
   });
   
   return res;
 }
 
-// fetchPrice("BA").then(data=> {
-//   console.log("data is ", data);
-// });
-
-fetchPArray(["BA", "TSLA"]).then(resp=> {
-  console.log(resp);
-  Promise.all(resp). then(val => {
-    console.log(val);
-  })
-
-})
-
-
-  
 
 
 // this method loads user data
@@ -133,7 +118,14 @@ router.post("/loadData", (req, res) => {
       
       let ticArr = data[0].portfolio.ticker.concat(data[0].watchlist.ticker);
       
-      fetch
+      fetchPArray(ticArr).then(resp => {
+        Promise.all(resp).then(val => {
+          data[0].portfolio.price = val.slice(0,  pSize);
+          data[0].watchlist.price = val.slice(pSize);
+          console.log("looooaded data is", data);
+          res.json({success: true, data: data});
+        })
+      })
 //       async function getPrices() {
 //         if (data[0].watchlist.ticker.length !== 0) {
 //           var wPrices = await data[0].watchlist.ticker.map(tic => {
