@@ -315,6 +315,13 @@ router.post("/sellTicker", (req, res) => {
         }
         else {
           fund = fund + shares*p;
+          let portfolio = data[0].portfolio;
+          let index = portfolio.ticker.indexOf(ticker.toUpperCase()); 
+          let newShares = portfolio.shares[index] - shares;
+          
+          if(newShares === 0) {
+            
+          }
           
         }
       }
