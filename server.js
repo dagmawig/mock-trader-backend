@@ -184,9 +184,19 @@ router.post("/buyTicker", (req, res) => {
             )} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
           });
         } else {
+          
+          let date = new Date();
+          let history = data[0].history;
+          history.ticker.push(ticker.toUpperCase());
+          history.price.push(price);
+          history.shares.push(shares);
+          history.limit.push("Limit Buy");
+          history.date.push(date);
+          
+          
           fund = fund - shares * p;
           let portfolio = data[0].portfolio;
-
+          
           if (!portfolio.ticker.includes(ticker.toUpperCase())) {
             portfolio.ticker.push(ticker.toUpperCase());
             portfolio.shares.push(shares);

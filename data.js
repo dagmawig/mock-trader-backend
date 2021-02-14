@@ -16,6 +16,16 @@ const DataSchema = new Schema(
         shares: [],
         averageC: [],
       }
+    },
+    history: {
+       type: Schema.Types.Mixed,
+      default: {
+        ticker: [],
+        price: [],
+        shares: [],
+        limit: [],
+        date: []
+      }
     }
   },
   { timestamps: true, _id: true, minimize: false, strict: false }
