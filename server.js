@@ -91,11 +91,9 @@ async function fetchPArray(arr) {
   let res = await arr.map(tic => {
     return fetchPrice(tic);
   });
-  
+
   return res;
 }
-
-
 
 // this method loads user data
 
@@ -113,19 +111,17 @@ router.post("/loadData", (req, res) => {
         res.json({ success: true, data: data });
       });
     } else {
-      
       let pSize = data[0].portfolio.ticker.length;
-      
-      
+
       let ticArr = data[0].portfolio.ticker.concat(data[0].watchlist.ticker);
-      
+
       fetchPArray(ticArr).then(resp => {
         Promise.all(resp).then(val => {
-          data[0].portfolio.price = val.slice(0,  pSize);
+          data[0].portfolio.price = val.slice(0, pSize);
           data[0].watchlist.price = val.slice(pSize);
-          res.json({success: true, data: data[0]});
-        })
-      })
+          res.json({ success: true, data: data[0] });
+        });
+      });
     }
   });
 });
@@ -296,38 +292,51 @@ router.post("/buyTicker", (req, res) => {
 
 // this method is used to buy a stock
 router.post("/sellTicker", (req, res) => {
-  const {userID, ticker } = req.body;
-  
+  const { userID, ticker } = req.body;
+
   Data.find({ userID: userID }, (err, data) => {
     let fund = data[0].fund;
-    
+
     fetchPrice(ticker).then(price => {
-      let p = parseFloat(price.replace(',', ''));
-      
-      const {userID, ticker, shares, limitOrder } = req.body;
-      
-      if(limitOrder) {
-        if(p < limitOrder) {
-          return res.json ({
+      let p = parseFloat(price.replace(",", ""));
+
+      const { userID, ticker, shares, limitOrder } = req.body;
+
+      if (limitOrder) {
+        if (p < limitOrder) {
+          return res.json({
             success: false,
-            message: `Can not complete transaction! \nStock price $${price} is lower than limit order $${formatNum(limitOrder)}!`
+            message: `Can not complete transaction! \nStock price $${price} is lower than limit order $${formatNum(
+              limitOrder
+            )}!`
+          });
+        } else {
+          fund = fund + shares * p;
+          let portfolio = data[0].portfolio;
+          let index = portfolio.ticker.indexOf(ticker.toUpperCase());
+          let newShares = portfolio.shares[index] - shares;
+
+          if (newShares === 0) {
+            portfolio.ticker.splice(index, 1);
+            portfolio.price.splice(index, 1);
+            portfolio.shares.splice(index, 1);
+            portfolio.averageC.splice(index, 1);
+          } else {
+            portfolio.shares[index] = newShares;
+            portfolio.price[index] = price;
+          }
+
+          let message = `Success! ${shares} shares of ${ticker.toUpperCase()} sold at a price of ${price}!`;
+
+          Data.findOneAndUpdate({ userID: userID }, {$set: { portfolio: portfolio, fund: fund }}, {new: true}, (err, data) => {
+            if (err) throw err;
+            return res.json
           });
         }
-        else {
-          fund = fund + shares*p;
-          let portfolio = data[0].portfolio;
-          let index = portfolio.ticker.indexOf(ticker.toUpperCase()); 
-          let newShares = portfolio.shares[index] - shares;
-          
-          if(newShares === 0) {
-            
-          }
-          
-        }
       }
-    })
-  })
-})
+    });
+  });
+});
 
 // append /api for our http requests
 app.use("/", router);
