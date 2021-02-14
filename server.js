@@ -295,7 +295,32 @@ router.post("/buyTicker", (req, res) => {
 });
 
 // this method is used to buy a stock
-router.post("/asell")
+router.post("/sellTicker", (req, res) => {
+  const {userID, ticker } = req.body;
+  
+  Data.find({ userID: userID }, (err, data) => {
+    let fund = data[0].fund;
+    
+    fetchPrice(ticker).then(price => {
+      let p = parseFloat(price.replace(',', ''));
+      
+      const {userID, ticker, shares, limitOrder } = req.body;
+      
+      if(limitOrder) {
+        if(p < limitOrder) {
+          return res.json ({
+            success: false,
+            message: `Can not complete transaction! \nStock price $${price} is lower than limit order $${formatNum(limitOrder)}!`
+          });
+        }
+        else {
+          fund = fund + shares*p;
+          
+        }
+      }
+    })
+  })
+})
 
 // append /api for our http requests
 app.use("/", router);
