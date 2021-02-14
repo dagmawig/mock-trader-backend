@@ -218,6 +218,7 @@ router.post("/buyTicker", (req, res) => {
               newShares;
             portfolio.shares[index] = newShares;
             portfolio.averageC[index] = cost;
+            portfolio.price[index] = price;
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
             Data.findOneAndUpdate(
               { userID: userID },
@@ -272,6 +273,7 @@ router.post("/buyTicker", (req, res) => {
               newShares;
             portfolio.shares[index] = newShares;
             portfolio.averageC[index] = cost;
+            portfolio.price[index] = price;
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
             Data.findOneAndUpdate(
               { userID: userID },
