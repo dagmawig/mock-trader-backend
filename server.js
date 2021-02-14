@@ -326,7 +326,7 @@ router.post("/sellTicker", (req, res) => {
             portfolio.price[index] = price;
           }
 
-          let message = `Success! ${shares} shares of ${ticker.toUpperCase()} sold at a price of ${price}!`;
+          let message = `Success! ${shares} shares of ${ticker.toUpperCase()} sold at a price of $${price}!`;
 
           Data.findOneAndUpdate({ userID: userID }, {$set: { portfolio: portfolio, fund: fund }}, {new: true}, (err, data) => {
             if (err) throw err;
@@ -350,7 +350,7 @@ router.post("/sellTicker", (req, res) => {
             portfolio.price[index] = price;
           }
 
-          let message = `Success! ${shares} shares of ${ticker.toUpperCase()} sold at a price of ${price}!`;
+          let message = `Success! ${shares} shares of ${ticker.toUpperCase()} sold at a price of $${price}!`;
 
           Data.findOneAndUpdate({ userID: userID }, {$set: { portfolio: portfolio, fund: fund }}, {new: true}, (err, data) => {
             if (err) throw err;
