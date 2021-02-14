@@ -185,6 +185,7 @@ router.post("/buyTicker", (req, res) => {
           });
         } else {
           let date = new Date();
+          date = Date.UTC(date);
           let history = data[0].history;
 
           history.ticker.push(ticker.toUpperCase());
@@ -249,7 +250,8 @@ router.post("/buyTicker", (req, res) => {
             )} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
           });
         } else {
-          let date = new Date.now();
+          let date = new Date();
+          date = Date.UTC(date);
           let history = data[0].history;
 
           history.ticker.push(ticker.toUpperCase());
@@ -332,6 +334,7 @@ router.post("/sellTicker", (req, res) => {
           });
         } else {
           let date = new Date();
+          date = Date.UTC(date);
           let history = data[0].history;
 
           history.ticker.push(ticker.toUpperCase());
@@ -374,6 +377,7 @@ router.post("/sellTicker", (req, res) => {
       } else {
         
         let date = new Date();
+        date = Date.UTC(date);
         let history = data[0].history;
 
         history.ticker.push(ticker.toUpperCase());
