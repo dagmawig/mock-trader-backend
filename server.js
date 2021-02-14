@@ -294,6 +294,9 @@ router.post("/buyTicker", (req, res) => {
   });
 });
 
+// this method is used to buy a stock
+router.post("/asell")
+
 // append /api for our http requests
 app.use("/", router);
 
