@@ -330,9 +330,32 @@ router.post("/sellTicker", (req, res) => {
 
           Data.findOneAndUpdate({ userID: userID }, {$set: { portfolio: portfolio, fund: fund }}, {new: true}, (err, data) => {
             if (err) throw err;
-            return res.json
+            return res.json({ success: true, data: {data: data, message: message }})
           });
         }
+      }
+      else {
+        fund = fund + shares * p;
+          let portfolio = data[0].portfolio;
+          let index = portfolio.ticker.indexOf(ticker.toUpperCase());
+          let newShares = portfolio.shares[index] - shares;
+
+          if (newShares === 0) {
+            portfolio.ticker.splice(index, 1);
+            portfolio.price.splice(index, 1);
+            portfolio.shares.splice(index, 1);
+            portfolio.averageC.splice(index, 1);
+          } else {
+            portfolio.shares[index] = newShares;
+            portfolio.price[index] = price;
+          }
+
+          let message = `Success! ${shares} shares of ${ticker.toUpperCase()} sold at a price of ${price}!`;
+
+          Data.findOneAndUpdate({ userID: userID }, {$set: { portfolio: portfolio, fund: fund }}, {new: true}, (err, data) => {
+            if (err) throw err;
+            return res.json({ success: true, data: {data: data, message: message }})
+          });
       }
     });
   });
