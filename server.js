@@ -249,7 +249,7 @@ router.post("/buyTicker", (req, res) => {
             )} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
           });
         } else {
-          let date = new Date();
+          let date = new Date.now();
           let history = data[0].history;
 
           history.ticker.push(ticker.toUpperCase());
