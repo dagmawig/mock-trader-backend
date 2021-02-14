@@ -184,19 +184,19 @@ router.post("/buyTicker", (req, res) => {
             )} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
           });
         } else {
-          
           let date = new Date();
           let history = data[0].history;
+
           history.ticker.push(ticker.toUpperCase());
           history.price.push(price);
           history.shares.push(shares);
+          history.value.push(-p * shares);
           history.limit.push("Limit Buy");
           history.date.push(date);
-          
-          
+
           fund = fund - shares * p;
           let portfolio = data[0].portfolio;
-          
+
           if (!portfolio.ticker.includes(ticker.toUpperCase())) {
             portfolio.ticker.push(ticker.toUpperCase());
             portfolio.shares.push(shares);
@@ -205,7 +205,7 @@ router.post("/buyTicker", (req, res) => {
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
             Data.findOneAndUpdate(
               { userID: userID },
-              { $set: { portfolio: portfolio, fund: fund } },
+              { $set: { portfolio: portfolio, fund: fund, history: history } },
               { new: true },
               (err, data) => {
                 if (err) throw err;
@@ -228,7 +228,7 @@ router.post("/buyTicker", (req, res) => {
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
             Data.findOneAndUpdate(
               { userID: userID },
-              { $set: { portfolio: portfolio, fund: fund } },
+              { $set: { portfolio: portfolio, fund: fund, history: history } },
               { new: true },
               (err, data) => {
                 if (err) throw err;
@@ -249,6 +249,16 @@ router.post("/buyTicker", (req, res) => {
             )} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
           });
         } else {
+          let date = new Date();
+          let history = data[0].history;
+
+          history.ticker.push(ticker.toUpperCase());
+          history.price.push(price);
+          history.shares.push(shares);
+          history.value.push(-p * shares);
+          history.limit.push("Market Buy");
+          history.date.push(date);
+
           fund = fund - shares * p;
           let portfolio = data[0].portfolio;
 
@@ -260,7 +270,7 @@ router.post("/buyTicker", (req, res) => {
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
             Data.findOneAndUpdate(
               { userID: userID },
-              { $set: { portfolio: portfolio, fund: fund } },
+              { $set: { portfolio: portfolio, fund: fund, history: history } },
               { new: true },
               (err, data) => {
                 if (err) throw err;
@@ -283,7 +293,7 @@ router.post("/buyTicker", (req, res) => {
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
             Data.findOneAndUpdate(
               { userID: userID },
-              { $set: { portfolio: portfolio, fund: fund } },
+              { $set: { portfolio: portfolio, fund: fund, history: history } },
               { new: true },
               (err, data) => {
                 if (err) throw err;
@@ -321,6 +331,16 @@ router.post("/sellTicker", (req, res) => {
             )}!`
           });
         } else {
+          let date = new Date();
+          let history = data[0].history;
+
+          history.ticker.push(ticker.toUpperCase());
+          history.price.push(price);
+          history.shares.push(shares);
+          history.value.push(p * shares);
+          history.limit.push("Limit Sell");
+          history.date.push(date);
+
           fund = fund + shares * p;
           let portfolio = data[0].portfolio;
           let index = portfolio.ticker.indexOf(ticker.toUpperCase());
@@ -338,34 +358,60 @@ router.post("/sellTicker", (req, res) => {
 
           let message = `Success! ${shares} shares of ${ticker.toUpperCase()} sold at a price of $${price}!`;
 
-          Data.findOneAndUpdate({ userID: userID }, {$set: { portfolio: portfolio, fund: fund }}, {new: true}, (err, data) => {
-            if (err) throw err;
-            return res.json({ success: true, data: {data: data, message: message }})
-          });
+          Data.findOneAndUpdate(
+            { userID: userID },
+            { $set: { portfolio: portfolio, fund: fund, history: history } },
+            { new: true },
+            (err, data) => {
+              if (err) throw err;
+              return res.json({
+                success: true,
+                data: { data: data, message: message }
+              });
+            }
+          );
         }
-      }
-      else {
+      } else {
+        
+        let date = new Date();
+        let history = data[0].history;
+
+        history.ticker.push(ticker.toUpperCase());
+        history.price.push(price);
+        history.shares.push(shares);
+        history.value.push(p * shares);
+        history.limit.push("Market Sell");
+        history.date.push(date);
+
         fund = fund + shares * p;
-          let portfolio = data[0].portfolio;
-          let index = portfolio.ticker.indexOf(ticker.toUpperCase());
-          let newShares = portfolio.shares[index] - shares;
+        let portfolio = data[0].portfolio;
+        let index = portfolio.ticker.indexOf(ticker.toUpperCase());
+        let newShares = portfolio.shares[index] - shares;
 
-          if (newShares === 0) {
-            portfolio.ticker.splice(index, 1);
-            portfolio.price.splice(index, 1);
-            portfolio.shares.splice(index, 1);
-            portfolio.averageC.splice(index, 1);
-          } else {
-            portfolio.shares[index] = newShares;
-            portfolio.price[index] = price;
-          }
+        if (newShares === 0) {
+          portfolio.ticker.splice(index, 1);
+          portfolio.price.splice(index, 1);
+          portfolio.shares.splice(index, 1);
+          portfolio.averageC.splice(index, 1);
+        } else {
+          portfolio.shares[index] = newShares;
+          portfolio.price[index] = price;
+        }
 
-          let message = `Success! ${shares} shares of ${ticker.toUpperCase()} sold at a price of $${price}!`;
+        let message = `Success! ${shares} shares of ${ticker.toUpperCase()} sold at a price of $${price}!`;
 
-          Data.findOneAndUpdate({ userID: userID }, {$set: { portfolio: portfolio, fund: fund }}, {new: true}, (err, data) => {
+        Data.findOneAndUpdate(
+          { userID: userID },
+          { $set: { portfolio: portfolio, fund: fund, history: history } },
+          { new: true },
+          (err, data) => {
             if (err) throw err;
-            return res.json({ success: true, data: {data: data, message: message }})
-          });
+            return res.json({
+              success: true,
+              data: { data: data, message: message }
+            });
+          }
+        );
       }
     });
   });

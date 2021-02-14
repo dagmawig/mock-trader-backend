@@ -23,6 +23,7 @@ const DataSchema = new Schema(
         ticker: [],
         price: [],
         shares: [],
+        value: [],
         limit: [],
         date: []
       }
