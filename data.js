@@ -25,7 +25,7 @@ const DataSchema = new Schema(
         shares: [],
         value: [],
         limit: [],
-        date: [[Date]]
+        date: []
       }
     }
   },
