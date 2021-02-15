@@ -29,6 +29,7 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true
 });
 
+//requirement to use findOneAndUpdate method
 mongoose.set("useFindAndModify", false);
 
 let db = mongoose.connection;
@@ -86,7 +87,7 @@ async function fetchPrice(ticker) {
   return res;
 }
 
-// this methos return array of prices given array of tickers
+// this methos return array of price promises given array of tickers
 async function fetchPArray(arr) {
   let res = await arr.map(tic => {
     return fetchPrice(tic);
@@ -96,7 +97,6 @@ async function fetchPArray(arr) {
 }
 
 // this method loads user data
-
 router.post("/loadData", (req, res) => {
   const { userID } = req.body;
   return Data.find({ userID: userID }, (err, data) => {
@@ -313,7 +313,7 @@ router.post("/buyTicker", (req, res) => {
   });
 });
 
-// this method is used to buy a stock
+// this method is used to sell a stock
 router.post("/sellTicker", (req, res) => {
   const { userID, ticker } = req.body;
 
