@@ -184,6 +184,7 @@ router.post("/buyTicker", (req, res) => {
             )} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
           });
         } else {
+          const { userID, ticker, shares, limitPrice } = req.body;
           let date = new Date();
           let history = data[0].history;
 
@@ -203,6 +204,7 @@ router.post("/buyTicker", (req, res) => {
             portfolio.averageC.push(price);
             portfolio.price.push(price);
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
+            console.log(userID, portfolio, fund, history);
             Data.findOneAndUpdate(
               { userID: userID },
               { $set: { portfolio: portfolio, fund: fund, history: history } },
