@@ -258,6 +258,8 @@ router.post("/buyTicker", (req, res) => {
           history.value.push(-p * shares);
           history.limit.push("Market Buy");
           history.date.push(date);
+          
+          console.log(history.date);
 
           fund = fund - shares * p;
           let portfolio = data[0].portfolio;
