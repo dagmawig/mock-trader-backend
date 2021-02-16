@@ -203,7 +203,7 @@ router.post("/buyTicker", (req, res) => {
             portfolio.shares.push(shares);
             portfolio.averageC.push(price);
             portfolio.price.push(price);
-            let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
+            let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of $${price}!`;
             Data.findOneAndUpdate(
               { userID: userID },
               { $set: { portfolio: portfolio, fund: fund, history: history } },
@@ -226,7 +226,7 @@ router.post("/buyTicker", (req, res) => {
             portfolio.shares[index] = newShares;
             portfolio.averageC[index] = cost;
             portfolio.price[index] = price;
-            let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
+            let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of $${price}!`;
             Data.findOneAndUpdate(
               { userID: userID },
               { $set: { portfolio: portfolio, fund: fund, history: history } },
