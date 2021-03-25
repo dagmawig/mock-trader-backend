@@ -165,7 +165,6 @@ router.post("/buyTicker", (req, res) => {
 
     fetchPrice(ticker).then(price => {
       let p = parseFloat(price.replace(",", ""));
-      console.log(p);
       const { userID, ticker, shares, limitPrice } = req.body;
 
       if (limitPrice) {
@@ -266,7 +265,6 @@ router.post("/buyTicker", (req, res) => {
           let portfolio = data[0].portfolio;
 
           if (!portfolio.ticker.includes(ticker.toUpperCase())) {
-            console.log("not portfolio", p);
             portfolio.ticker.push(ticker.toUpperCase());
             portfolio.shares.push(shares);
             portfolio.averageC.push(price);
