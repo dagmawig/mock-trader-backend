@@ -73,11 +73,14 @@ async function fetchPrice(ticker) {
       const $ = cheerio.load("" + resp.data);
       //console.log(resp.data);
       let price = $('div[id="quote-header-info"]')
-        .find('span[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)"]')
+        .find('fin-streamer[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(b)"]')
         .text()
         .toString();
-
-      console.log("fetch price is:", price);
+      let p = $('div[id="quote-header-info"]')
+        .find('h1')
+        .text()
+        .toString();
+      console.log("fetch price is:", price, p);
       return price;
     })
     .catch(err => {
