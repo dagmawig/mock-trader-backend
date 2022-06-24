@@ -77,9 +77,10 @@ async function fetchPrice(ticker) {
         .text()
         .toString();
       let p = $('div[id="quote-header-info"]')
-        .find('h1')
+        .find('div > div > fin-streamer')
         .text()
-        .toString();
+        .toString()
+        ;
       console.log("fetch price is:", price, p);
       return price;
     })
