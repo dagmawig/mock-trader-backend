@@ -427,6 +427,14 @@ router.post("/sellTicker", (req, res) => {
   });
 });
 
+router.post("/hey", (req,res)=>{
+  console.log("heyyyy");
+  Data.find({}, (err, data)=> {
+    if(err) res.json({success: false, message: err})
+    res.json({success: true, data: data})
+  })
+})
+
 // append /api for our http requests
 app.use("/", router);
 
