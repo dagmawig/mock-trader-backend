@@ -77,7 +77,9 @@ async function fetchPrice(ticker) {
         .text()
         .toString();
       let p = $('div[id="quote-header-info"]')
-        .find('div > div > fin-streamer')
+        .find('div > div > fin-streamer').each((index, element)=> {
+          console.log("DDDDDDDDDDD", Object.keys(element), element.type)
+            if(index===0) return element})
         .text()
         .toString()
         ;
