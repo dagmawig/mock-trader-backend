@@ -431,7 +431,7 @@ router.post("/hey", (req,res)=>{
   console.log("heyyyy");
   Data.find({}, (err, data)=> {
     if(err) res.json({success: false, message: err})
-    res.json({success: true, data: data})
+    res.json({success: true, data: data.length})
   })
 })
 
