@@ -100,7 +100,7 @@ router.post("/loadData", (req, res) => {
   const { userID } = req.body;
   return Data.find({ userID: userID }, (err, data) => {
     if (err) res.json({ success: false, error: err });
-
+    console.log(data)
     if (data.length === 0) {
       let data = new Data();
       data.userID = userID;
