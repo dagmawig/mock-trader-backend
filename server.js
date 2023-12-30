@@ -66,28 +66,33 @@ function formatNum(x) {
 
 async function fetchPrice(ticker) {
   let url = "https://finance.yahoo.com/quote/" + ticker;
-
+  let url2 = "https://api.marketdata.app/v1/stocks/quotes/" + ticker;
   let res = axios
-    .get(url)
+    .get(url2, {
+      params: {
+        format: 'json',
+            dateformat: 'timestamp',
+            symbol_lookup: 'true',
+            human: 'true',
+            token: process.env.MARKET_TOKEN
+      }
+    })
     .then(resp => {
-      const $ = cheerio.load("" + resp.data);
-      //console.log(resp.data);
-      // let price = $('div[id="quote-header-info"]')
-      //   .find('fin-streamer[class="Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(b)"]')
-      //   .text()
-      //   .toString();
-      let pArr="";
-      let p = $('div[id="quote-header-info"]')
-        .find('div > div > fin-streamer').each((index, element)=> {
-          if(index===0) {
-            pArr = element.attribs.value.toString();
-          }
-            })
-        .text()
-        .toString()
-        ;
-      console.log("fetch price is:", pArr);
-      return pArr;
+//       const $ = cheerio.load("" + resp.data);
+     
+//       let pArr="";
+//       let p = $('div[id="quote-header-info"]')
+//         .find('div > div > fin-streamer').each((index, element)=> {
+//           if(index===0) {
+//             pArr = element.attribs.value.toString();
+//           }
+//             })
+//         .text()
+//         .toString()
+//         ;
+//       console.log("fetch price is:", pArr);
+//       return pArr;
+        if()
     })
     .catch(err => {
       console.log(err);
