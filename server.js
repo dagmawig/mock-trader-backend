@@ -96,7 +96,7 @@ async function fetchPrice(ticker) {
         if(resp.data) {
           return resp.data.Last[0].toString();
         }
-        else return 'err';
+        else return '';
     })
     .catch(err => {
       console.log(err.message);
