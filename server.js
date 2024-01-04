@@ -100,7 +100,7 @@ async function fetchPrice(ticker) {
     })
     .catch(err => {
       console.log(err.message);
-      return 'err';
+      return '';
     });
   return res;
 }
