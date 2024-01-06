@@ -26,7 +26,7 @@ const DataSchema = new Schema(
         value: [],
         limit: [],
         date: []
-      }use
+      }
     }
   },
   { timestamps: true, _id: true, minimize: false, strict: false }
