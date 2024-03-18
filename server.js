@@ -445,6 +445,15 @@ router.post("/hey", (req,res)=>{
   })
 })
 
+async function fetchIt() {
+  let res = axios.get("https://a2cfg2sut3x6syzjb3mabvnz6e0jxfuh.lambda-url.us-east-2.on.aws/getCandles?ticker=goog&d1=2024-03-03&d2=2024-03-10");
+  return res;
+}
+
+fetchIt().then(respp=> {
+  console.log(respp.data)
+})
+
 // append /api for our http requests
 app.use("/", router);
 
