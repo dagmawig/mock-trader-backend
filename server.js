@@ -11,6 +11,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const Data = require("./data");
 var cors = require("cors");
+require('dotenv').config();
 
 const API_PORT = 3000;
 
@@ -24,12 +25,12 @@ app.use(bodyParser.json());
 
 // connects our back end code with the database
 mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
+  // useNewUrlParser: true,
+  //useUnifiedTopology: true
 });
 
 //requirement to use findOneAndUpdate method
-mongoose.set("useFindAndModify", false);
+//mongoose.set("useFindAndModify", false);
 
 let db = mongoose.connection;
 
@@ -38,9 +39,9 @@ db.once("open", () => console.log("connected to database"));
 // checks if connection with the database is successful
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
-app.get("/", function(req, res) {
-  res.sendFile(process.cwd() + "/views/index.html");
-});
+// app.get("/", function(req, res) {
+//   res.sendFile(process.cwd() + "/views/index.html");
+// });
 
 // this is our create method
 // this method creates new user in our database
@@ -71,32 +72,32 @@ async function fetchPrice(ticker) {
     .get(url2, {
       params: {
         format: 'json',
-            dateformat: 'timestamp',
-            symbol_lookup: 'true',
-            human: 'true',
-            token: process.env.MARKET_TOKEN
+        dateformat: 'timestamp',
+        symbol_lookup: 'true',
+        human: 'true',
+        token: process.env.MARKET_TOKEN
       }
     })
     .then(resp => {
-//       const $ = cheerio.load("" + resp.data);
-     
-//       let pArr="";
-//       let p = $('div[id="quote-header-info"]')
-//         .find('div > div > fin-streamer').each((index, element)=> {
-//           if(index===0) {
-//             pArr = element.attribs.value.toString();
-//           }
-//             })
-//         .text()
-//         .toString()
-//         ;
-//       console.log("fetch price is:", pArr);
-//       return pArr;
-        console.log(resp.data)
-        if(resp.data) {
-          return resp.data.Last[0].toString();
-        }
-        else return '';
+      //       const $ = cheerio.load("" + resp.data);
+
+      //       let pArr="";
+      //       let p = $('div[id="quote-header-info"]')
+      //         .find('div > div > fin-streamer').each((index, element)=> {
+      //           if(index===0) {
+      //             pArr = element.attribs.value.toString();
+      //           }
+      //             })
+      //         .text()
+      //         .toString()
+      //         ;
+      //       console.log("fetch price is:", pArr);
+      //       return pArr;
+      console.log(resp.data)
+      if (resp.data) {
+        return resp.data.Last[0].toString();
+      }
+      else return '';
     })
     .catch(err => {
       console.log(err.message);
@@ -115,52 +116,67 @@ async function fetchPArray(arr) {
 }
 
 // this method loads user data
-router.post("/loadData", (req, res) => {
-  const { userID } = req.body;
-  return Data.find({ userID: userID }, (err, data) => {
-    if (err) res.json({ success: false, error: err });
-    console.log(data)
+async function findUser(userID) {
+  try {
+    const data = await Data.find({ userID: userID });
+    console.log(data);
+
     if (data.length === 0) {
+
       let data = new Data();
       data.userID = userID;
       console.log("new data", data);
-      data.save(err => {
-        if (err) res.json({ success: false, error: err });
-        res.json({ success: true, data: data });
-      });
+      try {
+        const savedUser = await data.save();
+        console.log('user saved: ', savedUser);
+        return { success: true, data: savedUser };
+      } catch (err) {
+        return { success: false, error: err };
+      }
     } else {
       let pSize = data[0].portfolio.ticker.length;
-
       let ticArr = data[0].portfolio.ticker.concat(data[0].watchlist.ticker);
 
-      fetchPArray(ticArr).then(resp => {
-        Promise.all(resp).then(val => {
+      return fetchPArray(ticArr).then(resp => {
+        return Promise.all(resp).then(val => {
           data[0].portfolio.price = val.slice(0, pSize);
           data[0].watchlist.price = val.slice(pSize);
-          res.json({ success: true, data: data[0] });
+          return { success: true, data: data[0] };
         });
       });
     }
-  });
+  } catch (err) {
+    return { success: false, error: err };
+  }
+}
+
+router.post("/loadData", (req, res) => {
+  const { userID } = req.body;
+  findUser(userID).then(resp => {
+    return res.json(resp);
+  })
 });
 
 // this method updated stock watchlist
-router.post("/updateWatchlist", (req, res) => {
-  const { userID, newWatchlist } = req.body;
-  console.log(newWatchlist);
-
-  Data.find({ userID: userID }, (err, data) => {
-    Data.findOneAndUpdate(
+async function updateWatchlist(userID, newWatchlist) {
+  try {
+    const data = await Data.findOneAndUpdate(
       { userID: userID },
       { $set: { watchlist: newWatchlist } },
-      { new: true },
-      (err, data) => {
-        if (err) throw err;
-        //console.log("Data after update: ", data);
-        return res.json({ success: true, watchlist: data.watchlist });
-      }
+      { new: true }
     );
-  });
+    console.log(data);
+    return {success: true, watchlist: data.watchlist};
+  } catch (err) {
+    return {success: false, error: err};
+  }
+}
+router.post("/updateWatchlist", (req, res) => {
+  const { userID, newWatchlist } = req.body;
+ 
+  updateWatchlist(userID, newWatchlist).then(resp => {
+    return res.json(resp);
+  })
 });
 
 // this method gets price for a given ticker
@@ -175,33 +191,35 @@ router.get("/getPrice/:ticker?", (req, res) => {
 });
 
 // this method buys stock for a given ticker
-router.post("/buyTicker", (req, res) => {
-  const { userID, ticker } = req.body;
-
-  Data.find({ userID: userID }, (err, data) => {
+async function buyTicker(body) {
+  try {
+    const { userID, ticker, shares, limitPrice } = body;
+    const data = await Data.find({ userID: userID });
+    console.log(data);
     let fund = data[0].fund;
 
-    fetchPrice(ticker).then(price => {
+    
+    fetchPrice(ticker).then(async (price) => {
       let p = parseFloat(price.replace(",", ""));
-      const { userID, ticker, shares, limitPrice } = req.body;
+      
 
       if (limitPrice) {
         if (p > limitPrice) {
-          return res.json({
+          return {
             success: false,
             message: `Can not complete transaction! \nStock price $${price} is higher than limit price $${formatNum(
               limitPrice
             )}!`
-          });
+          };
         } else if (shares * p > fund) {
-          return res.json({
+          return {
             success: false,
             message: `Can not complete transaction! \nFunding $${formatNum(
               fund
             )} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
-          });
+          };
         } else {
-          const { userID, ticker, shares, limitPrice } = req.body;
+          //const { userID, ticker, shares, limitPrice } = req.body;
           let date = new Date();
           let history = data[0].history;
 
@@ -221,18 +239,29 @@ router.post("/buyTicker", (req, res) => {
             portfolio.averageC.push(price);
             portfolio.price.push(price);
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of $${price}!`;
-            Data.findOneAndUpdate(
+
+            const updatedData = await Data.findOneAndUpdate(
               { userID: userID },
               { $set: { portfolio: portfolio, fund: fund, history: history } },
-              { new: true },
-              (err, data) => {
-                if (err) throw err;
-                return res.json({
-                  success: true,
-                  data: { data: data, message: message }
-                });
-              }
+              { new: true }
             );
+
+            return {
+              success: true,
+              data: { data: updatedData, message: message }
+            };
+            // Data.findOneAndUpdate(
+            //   { userID: userID },
+            //   { $set: { portfolio: portfolio, fund: fund, history: history } },
+            //   { new: true },
+            //   (err, data) => {
+            //     if (err) throw err;
+            //     return res.json({
+            //       success: true,
+            //       data: { data: data, message: message }
+            //     });
+            //   }
+            // );
           } else {
             let index = portfolio.ticker.indexOf(ticker.toUpperCase());
             let newShares = portfolio.shares[index] + shares;
@@ -244,28 +273,39 @@ router.post("/buyTicker", (req, res) => {
             portfolio.averageC[index] = cost;
             portfolio.price[index] = price;
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of $${price}!`;
-            Data.findOneAndUpdate(
+
+            const updatedData = await Data.findOneAndUpdate(
               { userID: userID },
               { $set: { portfolio: portfolio, fund: fund, history: history } },
-              { new: true },
-              (err, data) => {
-                if (err) throw err;
-                return res.json({
-                  success: true,
-                  data: { data: data, message: message }
-                });
-              }
+              { new: true }
             );
+
+            return {
+              success: true,
+              data: { data: updatedData, message: message }
+            };
+            // Data.findOneAndUpdate(
+            //   { userID: userID },
+            //   { $set: { portfolio: portfolio, fund: fund, history: history } },
+            //   { new: true },
+            //   (err, data) => {
+            //     if (err) throw err;
+            //     return res.json({
+            //       success: true,
+            //       data: { data: data, message: message }
+            //     });
+            //   }
+            // );
           }
         }
       } else {
         if (shares * p > fund) {
-          return res.json({
+          return {
             success: false,
             message: `Can not complete transaction! \nFunding $${formatNum(
               fund
             )} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
-          });
+          };
         } else {
           let date = new Date();
           let history = data[0].history;
@@ -276,7 +316,7 @@ router.post("/buyTicker", (req, res) => {
           history.value.push(-p * shares);
           history.limit.push("Market Buy");
           history.date.push(date);
-          
+
           console.log(history.date);
 
           fund = fund - shares * p;
@@ -288,18 +328,29 @@ router.post("/buyTicker", (req, res) => {
             portfolio.averageC.push(price);
             portfolio.price.push(price);
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
-            Data.findOneAndUpdate(
+
+            const updatedData = await Data.findOneAndUpdate(
               { userID: userID },
               { $set: { portfolio: portfolio, fund: fund, history: history } },
-              { new: true },
-              (err, data) => {
-                if (err) throw err;
-                return res.json({
-                  success: true,
-                  data: { data: data, message: message }
-                });
-              }
+              { new: true }
             );
+
+            return {
+              success: true,
+              data: { data: updatedData, message: message }
+            };
+            // Data.findOneAndUpdate(
+            //   { userID: userID },
+            //   { $set: { portfolio: portfolio, fund: fund, history: history } },
+            //   { new: true },
+            //   (err, data) => {
+            //     if (err) throw err;
+            //     return res.json({
+            //       success: true,
+            //       data: { data: data, message: message }
+            //     });
+            //   }
+            // );
           } else {
             let index = portfolio.ticker.indexOf(ticker.toUpperCase());
             let newShares = portfolio.shares[index] + shares;
@@ -311,61 +362,232 @@ router.post("/buyTicker", (req, res) => {
             portfolio.averageC[index] = cost;
             portfolio.price[index] = price;
             let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
-            Data.findOneAndUpdate(
+
+            const updatedData = await Data.findOneAndUpdate(
               { userID: userID },
               { $set: { portfolio: portfolio, fund: fund, history: history } },
-              { new: true },
-              (err, data) => {
-                if (err) throw err;
-                return res.json({
-                  success: true,
-                  data: { data: data, message: message }
-                });
-              }
+              { new: true }
             );
+
+            return{
+              success: true,
+              data: { data: updatedData, message: message }
+            };
+            // Data.findOneAndUpdate(
+            //   { userID: userID },
+            //   { $set: { portfolio: portfolio, fund: fund, history: history } },
+            //   { new: true },
+            //   (err, data) => {
+            //     if (err) throw err;
+            //     return res.json({
+            //       success: true,
+            //       data: { data: data, message: message }
+            //     });
+            //   }
+            // );
           }
         }
       }
-    });
+    });    
+  } catch (err) {
+    console.log(err);
+    return { success: false, error: err };
+  }
+
+}
+router.post("/buyTicker", (req, res) => {
+  buyTicker(req.body).then(resp => {
+    return res.json(resp);
   });
+
+  // Data.find({ userID: userID }, (err, data) => {
+  //   let fund = data[0].fund;
+
+  //   fetchPrice(ticker).then(price => {
+  //     let p = parseFloat(price.replace(",", ""));
+  //     const { userID, ticker, shares, limitPrice } = req.body;
+
+  //     if (limitPrice) {
+  //       if (p > limitPrice) {
+  //         return res.json({
+  //           success: false,
+  //           message: `Can not complete transaction! \nStock price $${price} is higher than limit price $${formatNum(
+  //             limitPrice
+  //           )}!`
+  //         });
+  //       } else if (shares * p > fund) {
+  //         return res.json({
+  //           success: false,
+  //           message: `Can not complete transaction! \nFunding $${formatNum(
+  //             fund
+  //           )} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
+  //         });
+  //       } else {
+  //         const { userID, ticker, shares, limitPrice } = req.body;
+  //         let date = new Date();
+  //         let history = data[0].history;
+
+  //         history.ticker.push(ticker.toUpperCase());
+  //         history.price.push(price);
+  //         history.shares.push(shares);
+  //         history.value.push(-p * shares);
+  //         history.limit.push("Limit Buy");
+  //         history.date.push(date);
+
+  //         fund = fund - shares * p;
+  //         let portfolio = data[0].portfolio;
+
+  //         if (!portfolio.ticker.includes(ticker.toUpperCase())) {
+  //           portfolio.ticker.push(ticker.toUpperCase());
+  //           portfolio.shares.push(shares);
+  //           portfolio.averageC.push(price);
+  //           portfolio.price.push(price);
+  //           let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of $${price}!`;
+  //           Data.findOneAndUpdate(
+  //             { userID: userID },
+  //             { $set: { portfolio: portfolio, fund: fund, history: history } },
+  //             { new: true },
+  //             (err, data) => {
+  //               if (err) throw err;
+  //               return res.json({
+  //                 success: true,
+  //                 data: { data: data, message: message }
+  //               });
+  //             }
+  //           );
+  //         } else {
+  //           let index = portfolio.ticker.indexOf(ticker.toUpperCase());
+  //           let newShares = portfolio.shares[index] + shares;
+  //           let cost =
+  //             (portfolio.shares[index] * portfolio.averageC[index] +
+  //               shares * p) /
+  //             newShares;
+  //           portfolio.shares[index] = newShares;
+  //           portfolio.averageC[index] = cost;
+  //           portfolio.price[index] = price;
+  //           let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of $${price}!`;
+  //           Data.findOneAndUpdate(
+  //             { userID: userID },
+  //             { $set: { portfolio: portfolio, fund: fund, history: history } },
+  //             { new: true },
+  //             (err, data) => {
+  //               if (err) throw err;
+  //               return res.json({
+  //                 success: true,
+  //                 data: { data: data, message: message }
+  //               });
+  //             }
+  //           );
+  //         }
+  //       }
+  //     } else {
+  //       if (shares * p > fund) {
+  //         return res.json({
+  //           success: false,
+  //           message: `Can not complete transaction! \nFunding $${formatNum(
+  //             fund
+  //           )} is not sufficient to buy ${shares} shares of ${ticker} at current price of $${price}!`
+  //         });
+  //       } else {
+  //         let date = new Date();
+  //         let history = data[0].history;
+
+  //         history.ticker.push(ticker.toUpperCase());
+  //         history.price.push(price);
+  //         history.shares.push(shares);
+  //         history.value.push(-p * shares);
+  //         history.limit.push("Market Buy");
+  //         history.date.push(date);
+
+  //         console.log(history.date);
+
+  //         fund = fund - shares * p;
+  //         let portfolio = data[0].portfolio;
+
+  //         if (!portfolio.ticker.includes(ticker.toUpperCase())) {
+  //           portfolio.ticker.push(ticker.toUpperCase());
+  //           portfolio.shares.push(shares);
+  //           portfolio.averageC.push(price);
+  //           portfolio.price.push(price);
+  //           let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
+  //           Data.findOneAndUpdate(
+  //             { userID: userID },
+  //             { $set: { portfolio: portfolio, fund: fund, history: history } },
+  //             { new: true },
+  //             (err, data) => {
+  //               if (err) throw err;
+  //               return res.json({
+  //                 success: true,
+  //                 data: { data: data, message: message }
+  //               });
+  //             }
+  //           );
+  //         } else {
+  //           let index = portfolio.ticker.indexOf(ticker.toUpperCase());
+  //           let newShares = portfolio.shares[index] + shares;
+  //           let cost =
+  //             (portfolio.shares[index] * portfolio.averageC[index] +
+  //               shares * p) /
+  //             newShares;
+  //           portfolio.shares[index] = newShares;
+  //           portfolio.averageC[index] = cost;
+  //           portfolio.price[index] = price;
+  //           let message = `Success! ${shares} shares of ${ticker.toUpperCase()} bought at a price of ${price}!`;
+  //           Data.findOneAndUpdate(
+  //             { userID: userID },
+  //             { $set: { portfolio: portfolio, fund: fund, history: history } },
+  //             { new: true },
+  //             (err, data) => {
+  //               if (err) throw err;
+  //               return res.json({
+  //                 success: true,
+  //                 data: { data: data, message: message }
+  //               });
+  //             }
+  //           );
+  //         }
+  //       }
+  //     }
+  //   });
+  // });
 });
 
 // this method is used to sell a stock
-router.post("/sellTicker", (req, res) => {
-  const { userID, ticker } = req.body;
+async function sellTicker(body) {
+  const { userID, ticker, shares, limitOrder } = body;
 
-  Data.find({ userID: userID }, (err, data) => {
+  try {
+    const data = await Data.find({ userID: userID });
+    console.log(data);
     let fund = data[0].fund;
-
-    fetchPrice(ticker).then(price => {
+  
+    fetchPrice(ticker).then(async (price) => {
       let p = parseFloat(price.replace(",", ""));
-
-      const { userID, ticker, shares, limitOrder } = req.body;
-
+  
       if (limitOrder) {
         if (p < limitOrder) {
-          return res.json({
+          return {
             success: false,
             message: `Can not complete transaction! \nStock price $${price} is lower than limit order $${formatNum(
               limitOrder
             )}!`
-          });
+          };
         } else {
           let date = new Date();
           let history = data[0].history;
-
+  
           history.ticker.push(ticker.toUpperCase());
           history.price.push(price);
           history.shares.push(shares);
           history.value.push(p * shares);
           history.limit.push("Limit Sell");
           history.date.push(date);
-
+  
           fund = fund + shares * p;
           let portfolio = data[0].portfolio;
           let index = portfolio.ticker.indexOf(ticker.toUpperCase());
           let newShares = portfolio.shares[index] - shares;
-
+  
           if (newShares === 0) {
             portfolio.ticker.splice(index, 1);
             portfolio.price.splice(index, 1);
@@ -375,39 +597,49 @@ router.post("/sellTicker", (req, res) => {
             portfolio.shares[index] = newShares;
             portfolio.price[index] = price;
           }
-
+  
           let message = `Success! ${shares} shares of ${ticker.toUpperCase()} sold at a price of $${price}!`;
-
-          Data.findOneAndUpdate(
+  
+          const updatedData = await Data.findOneAndUpdate(
             { userID: userID },
             { $set: { portfolio: portfolio, fund: fund, history: history } },
-            { new: true },
-            (err, data) => {
-              if (err) throw err;
-              return res.json({
-                success: true,
-                data: { data: data, message: message }
-              });
-            }
+            { new: true }
           );
+          return {
+            success: true,
+            data: { data: updatedData, message: message }
+          };
+  
+          // Data.findOneAndUpdate(
+          //   { userID: userID },
+          //   { $set: { portfolio: portfolio, fund: fund, history: history } },
+          //   { new: true },
+          //   (err, data) => {
+          //     if (err) throw err;
+          //     return res.json({
+          //       success: true,
+          //       data: { data: data, message: message }
+          //     });
+          //   }
+          // );
         }
       } else {
-        
+  
         let date = new Date();
         let history = data[0].history;
-
+  
         history.ticker.push(ticker.toUpperCase());
         history.price.push(price);
         history.shares.push(shares);
         history.value.push(p * shares);
         history.limit.push("Market Sell");
         history.date.push(date);
-
+  
         fund = fund + shares * p;
         let portfolio = data[0].portfolio;
         let index = portfolio.ticker.indexOf(ticker.toUpperCase());
         let newShares = portfolio.shares[index] - shares;
-
+  
         if (newShares === 0) {
           portfolio.ticker.splice(index, 1);
           portfolio.price.splice(index, 1);
@@ -417,42 +649,164 @@ router.post("/sellTicker", (req, res) => {
           portfolio.shares[index] = newShares;
           portfolio.price[index] = price;
         }
-
+  
         let message = `Success! ${shares} shares of ${ticker.toUpperCase()} sold at a price of $${price}!`;
-
-        Data.findOneAndUpdate(
+  
+        const updatedData = await Data.findOneAndUpdate(
           { userID: userID },
           { $set: { portfolio: portfolio, fund: fund, history: history } },
-          { new: true },
-          (err, data) => {
-            if (err) throw err;
-            return res.json({
-              success: true,
-              data: { data: data, message: message }
-            });
-          }
+          { new: true }
         );
+  
+        return {
+          success: true,
+          data: { data: updatedData, message: message }
+        };
+  
+        // Data.findOneAndUpdate(
+        //   { userID: userID },
+        //   { $set: { portfolio: portfolio, fund: fund, history: history } },
+        //   { new: true },
+        //   (err, data) => {
+        //     if (err) throw err;
+        //     return res.json({
+        //       success: true,
+        //       data: { data: data, message: message }
+        //     });
+        //   }
+        // );
       }
     });
-  });
+  } catch (err) {
+    console.log(err);
+    return { success: false, error: err };
+  }
+ 
+}
+router.post("/sellTicker", (req, res) => {
+
+  sellTicker(req.body).then(resp => {
+    return res.json(resp);
+  })
+  // Data.find({ userID: userID }, (err, data) => {
+  //   let fund = data[0].fund;
+
+  //   fetchPrice(ticker).then(price => {
+  //     let p = parseFloat(price.replace(",", ""));
+
+  //     const { userID, ticker, shares, limitOrder } = req.body;
+
+  //     if (limitOrder) {
+  //       if (p < limitOrder) {
+  //         return res.json({
+  //           success: false,
+  //           message: `Can not complete transaction! \nStock price $${price} is lower than limit order $${formatNum(
+  //             limitOrder
+  //           )}!`
+  //         });
+  //       } else {
+  //         let date = new Date();
+  //         let history = data[0].history;
+
+  //         history.ticker.push(ticker.toUpperCase());
+  //         history.price.push(price);
+  //         history.shares.push(shares);
+  //         history.value.push(p * shares);
+  //         history.limit.push("Limit Sell");
+  //         history.date.push(date);
+
+  //         fund = fund + shares * p;
+  //         let portfolio = data[0].portfolio;
+  //         let index = portfolio.ticker.indexOf(ticker.toUpperCase());
+  //         let newShares = portfolio.shares[index] - shares;
+
+  //         if (newShares === 0) {
+  //           portfolio.ticker.splice(index, 1);
+  //           portfolio.price.splice(index, 1);
+  //           portfolio.shares.splice(index, 1);
+  //           portfolio.averageC.splice(index, 1);
+  //         } else {
+  //           portfolio.shares[index] = newShares;
+  //           portfolio.price[index] = price;
+  //         }
+
+  //         let message = `Success! ${shares} shares of ${ticker.toUpperCase()} sold at a price of $${price}!`;
+
+  //         Data.findOneAndUpdate(
+  //           { userID: userID },
+  //           { $set: { portfolio: portfolio, fund: fund, history: history } },
+  //           { new: true },
+  //           (err, data) => {
+  //             if (err) throw err;
+  //             return res.json({
+  //               success: true,
+  //               data: { data: data, message: message }
+  //             });
+  //           }
+  //         );
+  //       }
+  //     } else {
+
+  //       let date = new Date();
+  //       let history = data[0].history;
+
+  //       history.ticker.push(ticker.toUpperCase());
+  //       history.price.push(price);
+  //       history.shares.push(shares);
+  //       history.value.push(p * shares);
+  //       history.limit.push("Market Sell");
+  //       history.date.push(date);
+
+  //       fund = fund + shares * p;
+  //       let portfolio = data[0].portfolio;
+  //       let index = portfolio.ticker.indexOf(ticker.toUpperCase());
+  //       let newShares = portfolio.shares[index] - shares;
+
+  //       if (newShares === 0) {
+  //         portfolio.ticker.splice(index, 1);
+  //         portfolio.price.splice(index, 1);
+  //         portfolio.shares.splice(index, 1);
+  //         portfolio.averageC.splice(index, 1);
+  //       } else {
+  //         portfolio.shares[index] = newShares;
+  //         portfolio.price[index] = price;
+  //       }
+
+  //       let message = `Success! ${shares} shares of ${ticker.toUpperCase()} sold at a price of $${price}!`;
+
+  //       Data.findOneAndUpdate(
+  //         { userID: userID },
+  //         { $set: { portfolio: portfolio, fund: fund, history: history } },
+  //         { new: true },
+  //         (err, data) => {
+  //           if (err) throw err;
+  //           return res.json({
+  //             success: true,
+  //             data: { data: data, message: message }
+  //           });
+  //         }
+  //       );
+  //     }
+  //   });
+  // });
 });
 
-router.post("/hey", (req,res)=>{
+router.post("/hey", (req, res) => {
   console.log("heyyyy");
-  Data.find({}, (err, data)=> {
-    if(err) res.json({success: false, message: err})
-    res.json({success: true, data: data.length})
+  Data.find({}, (err, data) => {
+    if (err) res.json({ success: false, message: err })
+    res.json({ success: true, data: data.length })
   })
 })
 
-async function fetchIt() {
-  let res = axios.get("https://a2cfg2sut3x6syzjb3mabvnz6e0jxfuh.lambda-url.us-east-2.on.aws/getCandles?ticker=goog&d1=2024-03-03&d2=2024-03-10");
-  return res;
-}
+// async function fetchIt() {
+//   let res = axios.get("https://a2cfg2sut3x6syzjb3mabvnz6e0jxfuh.lambda-url.us-east-2.on.aws/getCandles?ticker=goog&d1=2024-03-03&d2=2024-03-10");
+//   return res;
+// }
 
-fetchIt().then(respp=> {
-  console.log(respp.data)
-})
+// fetchIt().then(respp=> {
+//   console.log(respp.data)
+// })
 
 // append /api for our http requests
 app.use("/", router);
