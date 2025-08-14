@@ -198,7 +198,7 @@ async function buyTicker(body) {
     let fund = data[0].fund;
 
     
-    fetchPrice(ticker).then(async (price) => {
+    return fetchPrice(ticker).then(async (price) => {
       let p = parseFloat(price.replace(",", ""));
       
 
@@ -396,6 +396,7 @@ async function buyTicker(body) {
 }
 router.post("/buyTicker", (req, res) => {
   buyTicker(req.body).then(resp => {
+    console.log('after buy ticker', resp);
     return res.json(resp);
   });
 
@@ -560,7 +561,7 @@ async function sellTicker(body) {
     console.log(data);
     let fund = data[0].fund;
   
-    fetchPrice(ticker).then(async (price) => {
+    return fetchPrice(ticker).then(async (price) => {
       let p = parseFloat(price.replace(",", ""));
   
       if (limitOrder) {
