@@ -791,11 +791,19 @@ router.post("/sellTicker", (req, res) => {
   // });
 });
 
+async function hey() {
+  try {
+    const data = await Data.find({});
+    return { success: true, data: data.length }
+  } catch (err) {
+    console.log(err);
+    return { success: false, message: err }
+  }
+}
 router.post("/hey", (req, res) => {
   console.log("heyyyy");
-  Data.find({}, (err, data) => {
-    if (err) res.json({ success: false, message: err })
-    res.json({ success: true, data: data.length })
+  hey().then(resp => {
+    return res.json(resp);
   })
 })
 
